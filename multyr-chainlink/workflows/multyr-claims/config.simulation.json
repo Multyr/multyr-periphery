@@ -1,0 +1,21 @@
+{
+  "mode": "preview",
+  "kind": "upkeep",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "catch-up",
+      "schedule": "0 */10 * * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Continuous polling catches funded epochs and retries; default local upkeep batch is 20 claims, verify deployed values.",
+    "Pays recorded claim owners through the deployed claim upkeep."
+  ],
+  "targetAddress": "0xD8CE7eA661A7E818337ad87E7bb87b56871da14E"
+}

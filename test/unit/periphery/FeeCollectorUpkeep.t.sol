@@ -58,6 +58,12 @@ contract MockERC20Minimal is IERC20 {
 
 contract MockFeeCollector {
     bool public shouldRevert;
+    bool public paused;
+    bool public allowlistEnabled;
+    mapping(address => bool) public allowedToken;
+    mapping(address => uint256) public minDistribution;
+    function shareConfigs(address) external pure returns (bool, uint8, address) { return (false, 0, address(0)); }
+    function setMinDistribution(address token, uint256 amount) external { minDistribution[token] = amount; }
     uint256 public distributeCallCount;
     address public lastDistributeToken;
 
@@ -65,6 +71,7 @@ contract MockFeeCollector {
         if (shouldRevert) revert("FeeCollector: paused");
         distributeCallCount++;
         lastDistributeToken = token;
+        MockERC20Minimal(token).burn(address(this), MockERC20Minimal(token).balanceOf(address(this)));
     }
 
     function setShouldRevert(bool revert_) external {
@@ -410,8 +417,13 @@ contract FeeCollectorUpkeepTest is Test {
 
         // distribute was not actually successful
         assertEq(mockFC.distributeCallCount(), 0);
-        // But lastDistributeTs was still updated (prevents retry loops)
-        assertEq(upkeep.lastDistributeTs(address(shareToken)), block.timestamp);
+        // Failures use a short retry delay, never the multi-day success interval.
+        assertEq(upkeep.lastDistributeTs(address(shareToken)), 0);
+        assertEq(upkeep.distributionRetryAt(address(shareToken)), block.timestamp + 5 minutes);
+        mockFC.setShouldRevert(false);
+        vm.warp(block.timestamp + 5 minutes);
+        upkeep.performUpkeep(abi.encode(address(shareToken)));
+        assertEq(mockFC.distributeCallCount(), 1);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -453,6 +465,24 @@ contract FeeCollectorUpkeepTest is Test {
         upkeep.performUpkeep(abi.encode(address(shareToken)));
         // block.timestamp >= lastDistributeTs + 0 is true
         assertEq(mockFC.distributeCallCount(), 2);
+    }
+
+    function test_thresholdSuppressesDustUntilEnoughAccumulates() public {
+        vm.prank(owner); upkeep.addToken(address(shareToken));
+        mockFC.setMinDistribution(address(shareToken), 100);
+        shareToken.mint(address(mockFC), 99);
+        (bool ready,) = upkeep.checkUpkeep(""); assertFalse(ready);
+        upkeep.performUpkeep(abi.encode(address(shareToken)));
+        assertEq(mockFC.distributeCallCount(), 0);
+        shareToken.mint(address(mockFC), 1);
+        (ready,) = upkeep.checkUpkeep(""); assertTrue(ready);
+    }
+
+    function test_malformedPayloadIsNoop() public {
+        upkeep.performUpkeep(hex"1234");
+        upkeep.performUpkeep(abi.encode(type(uint256).max));
+        upkeep.performUpkeep(abi.encode(address(shareToken), uint256(256)));
+        assertEq(mockFC.distributeCallCount(), 0);
     }
 
     function test_getTokens_emptyByDefault() public view {

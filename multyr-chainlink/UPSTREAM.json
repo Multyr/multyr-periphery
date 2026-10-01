@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/smartcontractkit/cre-templates",
+  "commit": "d0223f31182c76bc36b1cc9d47b13b18efcf2bf6",
+  "path": "starter-templates/automation-migration",
+  "creCli": "1.34.0",
+  "bun": "1.4.2",
+  "notes": "Receiver source unchanged. Added VaultUpkeep-specific deployment script and fork test; configured Arbitrum workflow. Receiver address and gas remain unset until deployment and measurement."
+}

@@ -1,0 +1,14 @@
+production-settings:
+  user-workflow:
+    workflow-name: "multyr-monitor-production"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.production.json"
+    secrets-path: ""
+simulation-settings:
+  user-workflow:
+    workflow-name: "multyr-monitor-simulation"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.simulation.json"
+    secrets-path: ""

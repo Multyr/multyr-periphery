@@ -1,0 +1,99 @@
+{
+  "mode": "preview",
+  "kind": "monitor",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "observe",
+      "schedule": "0 */5 * * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Structured CRE logs and returned observations only; wire external alert delivery separately.",
+    "Baseline 11 observations, not exhaustive telemetry of all 40 contracts. Read errors are explicit. No policy writes.",
+    "Paused=true is expected during shadow setup; adjust expectations only after review."
+  ],
+  "observations": [
+    {
+      "id": "core-paused",
+      "target": "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01",
+      "signature": "function paused() view returns (bool)",
+      "args": [],
+      "expect": false
+    },
+    {
+      "id": "warm-nav",
+      "target": "0xeC5aa85dA559943420e1464F6bE5Ec44aCe157e1",
+      "signature": "function warmNavState() view returns (uint256,uint40,bool)",
+      "args": [],
+      "index": 2,
+      "expect": true
+    },
+    {
+      "id": "outstanding-claims",
+      "target": "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01",
+      "signature": "function outstandingClaimCount() view returns (uint256)",
+      "args": []
+    },
+    {
+      "id": "funded-claims",
+      "target": "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01",
+      "signature": "function fundedOutstandingClaimCount() view returns (uint256)",
+      "args": []
+    },
+    {
+      "id": "funded-claim-paused",
+      "target": "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01",
+      "signature": "function pausedFundedClaim() view returns (bool)",
+      "args": [],
+      "expect": false
+    },
+    {
+      "id": "strategy-paused",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function paused() view returns (bool)",
+      "args": [],
+      "expect": false
+    },
+    {
+      "id": "rebalance-phase",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function rebalancePlanPhase() view returns (uint8)",
+      "args": []
+    },
+    {
+      "id": "last-apy-poke",
+      "target": "0xA01Aa76C782569691Aaf6A0790124Bd3E5Ff3ee6",
+      "signature": "function lastPokeTs() view returns (uint64)",
+      "args": []
+    },
+    {
+      "id": "fee-paused",
+      "target": "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a",
+      "signature": "function paused() view returns (bool)",
+      "args": [],
+      "expect": false
+    },
+    {
+      "id": "fee-queue",
+      "target": "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a",
+      "signature": "function pendingHarvestClaimCount(address) view returns (uint256)",
+      "args": [
+        "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01"
+      ]
+    },
+    {
+      "id": "fee-share-balance",
+      "target": "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01",
+      "signature": "function balanceOf(address) view returns (uint256)",
+      "args": [
+        "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a"
+      ]
+    }
+  ]
+}

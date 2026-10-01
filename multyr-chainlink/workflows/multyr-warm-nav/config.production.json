@@ -1,0 +1,30 @@
+{
+  "mode": "preview",
+  "kind": "calls",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "refresh",
+      "schedule": "0 */5 * * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Five-minute proposed refresh against historical 600-second interval; verify actual thresholds and need.",
+    "Permissionless refresh; transaction delivery is not proof of valid NAV, use monitoring. Can be merged with another data-maintenance workflow."
+  ],
+  "actions": [
+    {
+      "id": "refresh",
+      "target": "0xeC5aa85dA559943420e1464F6bE5Ec44aCe157e1",
+      "signature": "function refreshWarmNav()",
+      "args": [],
+      "guards": [],
+      "enabled": true
+    }
+  ]
+}

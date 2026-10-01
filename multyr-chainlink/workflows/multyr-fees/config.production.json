@@ -1,0 +1,91 @@
+{
+  "mode": "preview",
+  "kind": "calls",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "weekly-distribution",
+      "schedule": "0 0 0 * * 1",
+      "actionIds": [
+        "distribute-shares"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "queued-cleanup",
+      "schedule": "0 5-55/10 * * * *",
+      "actionIds": [
+        "harvest-queued"
+      ],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Weekly distribution plus ten-minute queued cleanup are separate handlers in one slot.",
+    "AUTO_HARVEST must be configured where intended. Preflight rejects an unready queue; errors are reported, never treated as payouts.",
+    "Direct FeeCollector calls; no nonexistent FeeCollectorUpkeep address. Add approved underlying token distributions if required."
+  ],
+  "actions": [
+    {
+      "id": "distribute-shares",
+      "target": "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a",
+      "signature": "function distribute(address)",
+      "args": [
+        "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01"
+      ],
+      "guards": [
+        {
+          "target": "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a",
+          "signature": "function paused() view returns (bool)",
+          "args": [],
+          "op": "eq",
+          "expected": false,
+          "index": 0
+        },
+        {
+          "target": "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01",
+          "signature": "function balanceOf(address) view returns (uint256)",
+          "args": [
+            "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a"
+          ],
+          "op": "gt",
+          "expected": "0",
+          "index": 0
+        }
+      ],
+      "enabled": true
+    },
+    {
+      "id": "harvest-queued",
+      "target": "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a",
+      "signature": "function harvestQueued(address)",
+      "args": [
+        "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01"
+      ],
+      "guards": [
+        {
+          "target": "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a",
+          "signature": "function paused() view returns (bool)",
+          "args": [],
+          "op": "eq",
+          "expected": false,
+          "index": 0
+        },
+        {
+          "target": "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a",
+          "signature": "function pendingHarvestClaimCount(address) view returns (uint256)",
+          "args": [
+            "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01"
+          ],
+          "op": "gt",
+          "expected": "0",
+          "index": 0
+        }
+      ],
+      "enabled": true
+    }
+  ]
+}

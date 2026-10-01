@@ -1,0 +1,27 @@
+# ==========================================================================
+# CRE WORKFLOW SETTINGS FILE
+# ==========================================================================
+test-settings:
+  user-workflow:
+    workflow-name: "multyr-strategy-test"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.test.json"
+    secrets-path: ""
+
+# ==========================================================================
+production-settings:
+  user-workflow:
+    workflow-name: "multyr-strategy-production"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.production.json"
+    secrets-path: ""
+
+simulation-settings:
+  user-workflow:
+    workflow-name: "multyr-strategy-simulation"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.simulation.json"
+    secrets-path: ""

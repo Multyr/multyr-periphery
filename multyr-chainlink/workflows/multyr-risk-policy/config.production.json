@@ -1,0 +1,44 @@
+{
+  "mode": "disabled",
+  "kind": "policy-preview",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "review",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Risk/regime zero values are placeholders, not decisions. Requires approved scoring policy and appropriate PARAM_ROLE/KEEPER_ROLE.",
+    "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+  ],
+  "actions": [
+    {
+      "id": "risk-score",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function setRiskScore(address,uint16)",
+      "args": [
+        "0x8b2Ca25cE2670D1e37037AD3b1fFb06B7Df793fe",
+        "0"
+      ],
+      "guards": [],
+      "enabled": false
+    },
+    {
+      "id": "regime",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function setRegime(uint8)",
+      "args": [
+        "0"
+      ],
+      "guards": [],
+      "enabled": false
+    }
+  ],
+  "observations": []
+}

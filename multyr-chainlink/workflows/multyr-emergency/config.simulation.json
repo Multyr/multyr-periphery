@@ -1,0 +1,43 @@
+{
+  "mode": "disabled",
+  "kind": "policy-preview",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "review",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Operator-approved incident response only; owner/admin permissions and withdrawAll compatibility require validation.",
+    "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+  ],
+  "actions": [
+    {
+      "id": "withdraw-all",
+      "target": "0x9E3C383092bd98Ce6b821Db5dD51fC5A9ccb231E",
+      "signature": "function withdrawAllToCore(address) returns (uint256)",
+      "args": [
+        "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1"
+      ],
+      "guards": [],
+      "enabled": false
+    },
+    {
+      "id": "adapter-pull",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function callAdapterEmergencyPull(address)",
+      "args": [
+        "0x8b2Ca25cE2670D1e37037AD3b1fFb06B7Df793fe"
+      ],
+      "guards": [],
+      "enabled": false
+    }
+  ],
+  "observations": []
+}

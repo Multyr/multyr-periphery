@@ -3,10 +3,34 @@ pragma solidity ^0.8.28;
 
 import { AutomationCompatibleInterface } from "@multyr-core/automation/AutomationCompatibleInterface.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IFeeCollectorForUpkeep {
     function distribute(address token) external;
+    function harvestQueued(address token) external;
+    function paused() external view returns (bool);
+    function allowlistEnabled() external view returns (bool);
+    function allowedToken(address token) external view returns (bool);
+    function minDistribution(address token) external view returns (uint256);
+    function shareConfigs(address token) external view returns (bool, uint8, address);
+    function pendingHarvestClaimCount(address token) external view returns (uint256);
+    function pendingHarvestClaimAt(address token, uint256 index) external view returns (uint256, uint256);
+}
+
+/// @dev ABI of the epoch queue deployed September 25, 2026.
+interface IFeeHarvestVault {
+    struct Claim { address user; uint64 requestedAt; bool claimed; uint256 assetsOwed; uint256 grossShares; }
+    struct Epoch {
+        uint8 state; uint64 openedAt; uint64 closedAt; uint64 fundedAt;
+        uint256 totalGrossShares; uint256 totalNetShares; uint256 totalFeeShares;
+        uint256 totalAssetsOwed; uint256 claimedAssets; uint256 claimCount;
+        uint256 reservedRemaining; uint256 recoveryIndex;
+    }
+    function epochClaim(uint256 epoch, uint256 claim) external view returns (Claim memory);
+    function epochData(uint256 epoch) external view returns (Epoch memory);
+    function pausedFundedClaim() external view returns (bool);
+    function asset() external view returns (address);
 }
 
 /// @title FeeCollectorUpkeep
@@ -14,7 +38,7 @@ interface IFeeCollectorForUpkeep {
 ///         for registered tokens. Interval is configurable by the owner.
 /// @dev    Follows the same patterns as MultiplyStrategyUpkeep (time-based, Ownable) and
 ///         PeripheryUpkeepAdapter (safe-idempotent performUpkeep, CTO mandate).
-contract FeeCollectorUpkeep is AutomationCompatibleInterface, Ownable {
+contract FeeCollectorUpkeep is AutomationCompatibleInterface, Ownable, ReentrancyGuard {
     // ═══════════════════════════════════════════════════════════════════════════
     // IMMUTABLES
     // ═══════════════════════════════════════════════════════════════════════════
@@ -24,6 +48,15 @@ contract FeeCollectorUpkeep is AutomationCompatibleInterface, Ownable {
     // ═══════════════════════════════════════════════════════════════════════════
     // STATE
     // ═══════════════════════════════════════════════════════════════════════════
+
+    uint256 public constant MAX_TOKENS = 32;
+    uint256 public constant MAX_PENDING_CLAIMS = 64;
+    uint256 public constant RETRY_DELAY = 5 minutes;
+    mapping(address => uint256) public distributionRetryAt;
+    mapping(address => uint256) public harvestRetryAt;
+    event HarvestTriggered(address indexed token);
+    event HarvestFailed(address indexed token, bytes reason);
+    event DistributionDeferred(address indexed token);
 
     uint64 public interval; // seconds between distributions (default 3 days = 259200)
     address[] public tokens; // tokens to distribute
@@ -65,6 +98,7 @@ contract FeeCollectorUpkeep is AutomationCompatibleInterface, Ownable {
     function addToken(address token) external onlyOwner {
         require(token != address(0), "token=0");
         require(!isToken[token], "already added");
+        require(tokens.length < MAX_TOKENS, "too many tokens");
         tokens.push(token);
         isToken[token] = true;
         emit TokenAdded(token);
@@ -92,47 +126,100 @@ contract FeeCollectorUpkeep is AutomationCompatibleInterface, Ownable {
     // CHAINLINK AUTOMATION
     // ═══════════════════════════════════════════════════════════════════════════
 
-    /// @notice Returns true + encoded token address when a registered token is due
-    ///         for distribution and has a non-zero balance at the FeeCollector.
-    function checkUpkeep(bytes calldata)
-        external
-        view
-        override
-        returns (bool upkeepNeeded, bytes memory performData)
-    {
-        uint256 len = tokens.length;
-        for (uint256 i = 0; i < len; i++) {
-            address token = tokens[i];
-            uint64 lastTs = lastDistributeTs[token];
-            if (
-                (lastTs == 0 || block.timestamp >= lastTs + interval)
-                    && IERC20(token).balanceOf(address(feeCollector)) > 0
-            ) {
-                return (true, abi.encode(token));
-            }
+    /// @notice Finds ready queue cleanup first, independently of distribution intervals.
+    /// @dev A broken registered token cannot block checks for the others. Scans are bounded
+    ///      to MAX_TOKENS * MAX_PENDING_CLAIMS; configure a smaller list for low gas limits.
+    function checkUpkeep(bytes calldata) external view override returns (bool, bytes memory) {
+        if (feeCollector.paused()) return (false, bytes(""));
+        for (uint256 i; i < tokens.length; ++i) {
+            try this.harvestReady(tokens[i]) returns (bool ready) {
+                if (ready) return (true, abi.encode(tokens[i], uint8(1)));
+            } catch {}
+        }
+        for (uint256 i; i < tokens.length; ++i) {
+            try this.distributionReady(tokens[i]) returns (bool ready) {
+                if (ready) return (true, abi.encode(tokens[i]));
+            } catch {}
         }
         return (false, bytes(""));
     }
 
-    /// @notice Execute distribution for the given token.
-    /// @dev Safe-idempotent (CTO mandate): re-checks all preconditions,
-    ///      silent returns if state changed. Uses try/catch so Chainlink
-    ///      never enters a revert loop.
-    function performUpkeep(bytes calldata performData) external override {
-        address token = abi.decode(performData, (address));
+    function harvestReady(address token) external view returns (bool) {
+        if (!isToken[token] || feeCollector.paused() || block.timestamp < harvestRetryAt[token]) return false;
+        (bool configured, uint8 mode, address underlying) = feeCollector.shareConfigs(token);
+        if (!configured || mode != 2 || underlying == address(0)) return false;
+        // harvestQueued can distribute accumulated underlying; match its allowlist guard.
+        if (feeCollector.allowlistEnabled() && !feeCollector.allowedToken(underlying)) return false;
+        uint256 count = feeCollector.pendingHarvestClaimCount(token);
+        if (count > MAX_PENDING_CLAIMS) return false;
+        for (uint256 i; i < count; ++i) {
+            (uint256 epoch, uint256 claim) = feeCollector.pendingHarvestClaimAt(token, i);
+            IFeeHarvestVault.Claim memory c = IFeeHarvestVault(token).epochClaim(epoch, claim);
+            if (c.claimed) return true; // permissionless payout still needs bookkeeping cleanup
+            if (c.user == address(feeCollector) && !IFeeHarvestVault(token).pausedFundedClaim()
+                && IFeeHarvestVault(token).epochData(epoch).state == 2) return true;
+        }
+        return false;
+    }
 
-        // Safe-idempotent guards
-        if (!isToken[token]) return;
-        uint64 lastTs = lastDistributeTs[token];
-        if (lastTs != 0 && block.timestamp < lastTs + interval) return;
-        if (IERC20(token).balanceOf(address(feeCollector)) == 0) return;
+    function distributionReady(address token) external view returns (bool) {
+        if (!isToken[token] || feeCollector.paused() || block.timestamp < distributionRetryAt[token]) return false;
+        uint256 last = lastDistributeTs[token];
+        if (last != 0 && block.timestamp < last + uint256(interval)) return false;
+        if (feeCollector.allowlistEnabled() && !feeCollector.allowedToken(token)) return false;
+        uint256 balance = IERC20(token).balanceOf(address(feeCollector));
+        if (balance == 0) return false;
+        (bool isShare, uint8 mode, address underlying) = feeCollector.shareConfigs(token);
+        if (!isShare) {
+            try IFeeHarvestVault(token).asset() returns (address asset) { isShare = asset != address(0); }
+            catch {}
+        }
+        if (!isShare) return balance >= feeCollector.minDistribution(token);
+        if (mode == 2) {
+            if (feeCollector.pendingHarvestClaimCount(token) >= MAX_PENDING_CLAIMS) return false;
+            if (feeCollector.allowlistEnabled() && !feeCollector.allowedToken(underlying)) return false;
+        }
+        // Collector does not apply the ERC20 threshold to share-token modes.
+        return true;
+    }
 
-        lastDistributeTs[token] = uint64(block.timestamp);
-
-        try feeCollector.distribute(token) {
-            emit DistributionTriggered(token, block.timestamp);
-        } catch (bytes memory reason) {
-            emit DistributionFailed(token, reason);
+    /// @dev Legacy address-only data still distributes. Action 1 cleans queued harvests.
+    ///      Revalidate stale data, and only begin the long interval after actual progress.
+    function performUpkeep(bytes calldata data) external override nonReentrant {
+        if (data.length != 32 && data.length != 64) return;
+        uint256 rawToken;
+        uint256 action;
+        assembly {
+            rawToken := calldataload(data.offset)
+            if eq(data.length, 64) { action := calldataload(add(data.offset, 32)) }
+        }
+        if (rawToken > type(uint160).max || action > 1) return;
+        address token = address(uint160(rawToken));
+        if (action == 1) {
+            try this.harvestReady(token) returns (bool ready) { if (!ready) return; } catch { return; }
+            try feeCollector.harvestQueued(token) {
+                delete harvestRetryAt[token];
+                emit HarvestTriggered(token);
+            } catch (bytes memory reason) {
+                harvestRetryAt[token] = block.timestamp + RETRY_DELAY;
+                emit HarvestFailed(token, reason);
+            }
+        } else {
+            try this.distributionReady(token) returns (bool ready) { if (!ready) return; } catch { return; }
+            uint256 beforeBalance = IERC20(token).balanceOf(address(feeCollector));
+            try feeCollector.distribute(token) {
+                if (IERC20(token).balanceOf(address(feeCollector)) < beforeBalance) {
+                    lastDistributeTs[token] = uint64(block.timestamp);
+                    delete distributionRetryAt[token];
+                    emit DistributionTriggered(token, block.timestamp);
+                } else {
+                    distributionRetryAt[token] = block.timestamp + RETRY_DELAY;
+                    emit DistributionDeferred(token);
+                }
+            } catch (bytes memory reason) {
+                distributionRetryAt[token] = block.timestamp + RETRY_DELAY;
+                emit DistributionFailed(token, reason);
+            }
         }
     }
 }

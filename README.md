@@ -209,6 +209,30 @@ ARBITRUM_ARCHIVE_RPC_URL=<rpc> forge test --match-path "test/fork/**"
 
 ---
 
+## Arbitrum CRE automation setup
+
+For the **25 September 2026 deployment**, start with the [new workflow suite](multyr-chainlink/WORKFLOWS.md),
+[workflow catalog and 40-contract addresses](multyr-chainlink/workflow-catalog.json), and
+[complete workflow inventory](docs/cre-workflow-inventory-2026-09-25-deployment.md).
+The suite includes maintenance, claims, fees, liquidity/NAV, monitoring and disabled policy previews.
+All configurations default to non-broadcast preview or disabled mode. Nothing is activated.
+
+The older migration setup below targets a different deployment. Its hardcoded deployment scripts and
+addresses must not be used for the September 25 contracts:
+
+The Chainlink receiver, vault workflow and deployment tooling live in this repository:
+
+- [VaultUpkeep setup and current status](multyr-chainlink/SETUP-STATUS.md)
+- [Automation inventory and testing runbook](docs/arbitrum-automation-runbook.md)
+- [Receiver deployment script](multyr-chainlink/contracts/evm/script/DeployVaultReceiver.s.sol)
+- [Workflow configuration](multyr-chainlink/multyr-core/config.production.json)
+- [Configuration generator](script/automation/configure_cre.py) and [deployment manifest](script/automation/arbitrum-deployment.json)
+
+The existing VaultUpkeep and StrategyUpkeep contracts stay in their respective protocol repositories.
+This project schedules calls to those deployed contracts. The prepared CRE workflow is **not yet active**;
+receiver deployment, account access and final gas configuration remain pending. Use the linked current
+setup status rather than legacy Automation registration instructions for this deployment.
+
 ## Deployment
 
 Periphery contracts are deployed after `multyr-core` and before the first user-facing

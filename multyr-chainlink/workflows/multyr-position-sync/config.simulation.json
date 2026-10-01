@@ -1,0 +1,38 @@
+{
+  "mode": "disabled",
+  "kind": "policy-preview",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "review",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "PARAM_ROLE required; existing rebalance/deploy paths already sync. Choose drift policy before adding writes.",
+    "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+  ],
+  "actions": [
+    {
+      "id": "sync",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function syncPositionAssets()",
+      "args": [],
+      "guards": [],
+      "enabled": false
+    }
+  ],
+  "observations": [
+    {
+      "id": "drift",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function drift() view returns (uint256,bool)",
+      "args": []
+    }
+  ]
+}

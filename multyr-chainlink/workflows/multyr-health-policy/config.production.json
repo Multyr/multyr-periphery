@@ -1,0 +1,47 @@
+{
+  "mode": "disabled",
+  "kind": "policy-preview",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "review",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Owner/guardian policy required; guardian cannot restore OK. This is not an autonomous emergency policy.",
+    "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders.",
+    "NAV zero is a placeholder. Router already updates last-known NAV; an independent update requires verified valuation and authorized-caller permission."
+  ],
+  "actions": [
+    {
+      "id": "health",
+      "target": "0x76C1f6c2AA37500E462543eCF28a52838A91eCf0",
+      "signature": "function setStrategyState(address,uint8,string)",
+      "args": [
+        "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+        "1",
+        "UNCONFIGURED_POLICY"
+      ],
+      "guards": [],
+      "enabled": false
+    },
+    {
+      "id": "nav-cache",
+      "target": "0x76C1f6c2AA37500E462543eCF28a52838A91eCf0",
+      "signature": "function updateLastKnownNAV(address,uint256)",
+      "args": [
+        "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+        "0"
+      ],
+      "guards": [],
+      "enabled": false
+    }
+  ],
+  "observations": []
+}

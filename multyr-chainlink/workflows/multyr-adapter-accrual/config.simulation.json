@@ -1,0 +1,39 @@
+{
+  "mode": "disabled",
+  "kind": "policy-preview",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "review",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Venus accrual is permissionless. Morpho refresh is onlyVault and cannot be called directly by a CRE receiver; implement/verify a routed forwarding path.",
+    "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+  ],
+  "actions": [
+    {
+      "id": "venus-accrue",
+      "target": "0xC9c1c7257Ab5161c4E77C10a26544b0B11d3419b",
+      "signature": "function accrueVenusInterest() returns (uint256)",
+      "args": [],
+      "guards": [],
+      "enabled": false
+    },
+    {
+      "id": "morpho-nav",
+      "target": "0x9493400E0c861774f4e264492E658805B58F8Ba2",
+      "signature": "function refreshNavCache()",
+      "args": [],
+      "guards": [],
+      "enabled": false
+    }
+  ],
+  "observations": []
+}

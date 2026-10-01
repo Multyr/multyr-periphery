@@ -1,0 +1,9 @@
+{
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "targetAddress": "0xd32a464df8e90D8aa9Bc290C4635eCE8D5362550",
+  "migrationType": "CUSTOM",
+  "schedule": "0 */1 * * * *",
+  "checkData": "0x",
+  "writeGasLimit": "0"
+}

@@ -1,0 +1,14 @@
+production-settings:
+  user-workflow:
+    workflow-name: "multyr-adapter-accrual-production"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.production.json"
+    secrets-path: ""
+simulation-settings:
+  user-workflow:
+    workflow-name: "multyr-adapter-accrual-simulation"
+  workflow-artifacts:
+    workflow-path: "./main.ts"
+    config-path: "./config.simulation.json"
+    secrets-path: ""

@@ -1,0 +1,13 @@
+test-settings:
+  rpcs:
+    - chain-name: ethereum-mainnet-arbitrum-1
+      url: https://arb1.arbitrum.io/rpc
+production-settings:
+  rpcs:
+    - chain-name: ethereum-mainnet-arbitrum-1
+      url: https://arb1.arbitrum.io/rpc
+
+simulation-settings:
+  rpcs:
+    - chain-name: ethereum-mainnet-arbitrum-1
+      url: https://arb1.arbitrum.io/rpc

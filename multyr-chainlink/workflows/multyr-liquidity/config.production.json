@@ -1,0 +1,150 @@
+{
+  "mode": "preview",
+  "kind": "calls",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "batch-0",
+      "schedule": "0 */5 * * * *",
+      "actionIds": [
+        "batch-0"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "batch-1",
+      "schedule": "5 */5 * * * *",
+      "actionIds": [
+        "batch-1"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "batch-2",
+      "schedule": "10 */5 * * * *",
+      "actionIds": [
+        "batch-2"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "batch-3",
+      "schedule": "15 */5 * * * *",
+      "actionIds": [
+        "batch-3"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "batch-4",
+      "schedule": "20 */5 * * * *",
+      "actionIds": [
+        "batch-4"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "batch-5",
+      "schedule": "25 */5 * * * *",
+      "actionIds": [
+        "batch-5"
+      ],
+      "enabled": true
+    },
+    {
+      "name": "batch-6",
+      "schedule": "30 */5 * * * *",
+      "actionIds": [
+        "batch-6"
+      ],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Seven bounded batch handlers in ONE workflow slot; seven executions every five minutes if all enabled.",
+    "Ranges index the CURRENT ENABLED adapter list, not deployment order. Verify membership and remove unused handlers before enabling live mode.",
+    "Each handler submits at most one report. Gas must fit the worst funded adapter, including receiver overhead."
+  ],
+  "actions": [
+    {
+      "id": "batch-0",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function pokeLiquidityBatch(uint256,uint256)",
+      "args": [
+        "0",
+        "1"
+      ],
+      "guards": [],
+      "enabled": true
+    },
+    {
+      "id": "batch-1",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function pokeLiquidityBatch(uint256,uint256)",
+      "args": [
+        "1",
+        "2"
+      ],
+      "guards": [],
+      "enabled": true
+    },
+    {
+      "id": "batch-2",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function pokeLiquidityBatch(uint256,uint256)",
+      "args": [
+        "2",
+        "3"
+      ],
+      "guards": [],
+      "enabled": true
+    },
+    {
+      "id": "batch-3",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function pokeLiquidityBatch(uint256,uint256)",
+      "args": [
+        "3",
+        "4"
+      ],
+      "guards": [],
+      "enabled": true
+    },
+    {
+      "id": "batch-4",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function pokeLiquidityBatch(uint256,uint256)",
+      "args": [
+        "4",
+        "5"
+      ],
+      "guards": [],
+      "enabled": true
+    },
+    {
+      "id": "batch-5",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function pokeLiquidityBatch(uint256,uint256)",
+      "args": [
+        "5",
+        "6"
+      ],
+      "guards": [],
+      "enabled": true
+    },
+    {
+      "id": "batch-6",
+      "target": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+      "signature": "function pokeLiquidityBatch(uint256,uint256)",
+      "args": [
+        "6",
+        "7"
+      ],
+      "guards": [],
+      "enabled": true
+    }
+  ]
+}

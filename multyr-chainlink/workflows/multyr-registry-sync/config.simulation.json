@@ -1,0 +1,55 @@
+{
+  "mode": "disabled",
+  "kind": "policy-preview",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "review",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Only after an approved registry update. Review metadata diff, parameter permissions, and adapter compatibility.",
+    "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+  ],
+  "actions": [
+    {
+      "id": "refresh-cometusdcmultimarketadapter",
+      "target": "0x96d5F520e1b1E046aB4417867d63FCcc59467432",
+      "signature": "function refreshFromRegistry()",
+      "args": [],
+      "guards": [],
+      "enabled": false
+    },
+    {
+      "id": "refresh-dolomiteusdcmultimarketadapter",
+      "target": "0x2aa571DA63893C265bB1F0d43DF1070ce691a303",
+      "signature": "function refreshFromRegistry()",
+      "args": [],
+      "guards": [],
+      "enabled": false
+    },
+    {
+      "id": "refresh-eulerusdcmultimarketadapter",
+      "target": "0x01e380438C013211A4f27A80cE316E0144cF1233",
+      "signature": "function refreshFromRegistry()",
+      "args": [],
+      "guards": [],
+      "enabled": false
+    },
+    {
+      "id": "refresh-morphousdcmultimarketadapter",
+      "target": "0x9493400E0c861774f4e264492E658805B58F8Ba2",
+      "signature": "function refreshFromRegistry()",
+      "args": [],
+      "guards": [],
+      "enabled": false
+    }
+  ],
+  "observations": []
+}

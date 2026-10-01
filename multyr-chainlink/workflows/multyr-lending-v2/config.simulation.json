@@ -1,0 +1,27 @@
+{
+  "mode": "preview",
+  "kind": "upkeep",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "daily",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    },
+    {
+      "name": "catch-up",
+      "schedule": "0 5-55/10 * * * *",
+      "actionIds": [],
+      "enabled": false
+    }
+  ],
+  "notes": [
+    "Daily 00:00 UTC. APY priority can starve later work without catch-up; verify pokeInterval and plan expiry.",
+    "One write per run; receipt success is not proof that harvested/rebalanced state advanced."
+  ],
+  "targetAddress": "0xA01Aa76C782569691Aaf6A0790124Bd3E5Ff3ee6"
+}

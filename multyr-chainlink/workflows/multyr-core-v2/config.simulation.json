@@ -1,0 +1,27 @@
+{
+  "mode": "preview",
+  "kind": "upkeep",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "weekly",
+      "schedule": "0 0 0 * * 1",
+      "actionIds": [],
+      "enabled": true
+    },
+    {
+      "name": "catch-up",
+      "schedule": "0 */10 * * * *",
+      "actionIds": [],
+      "enabled": false
+    }
+  ],
+  "notes": [
+    "September 25 deployment; weekly means Monday 00:00 UTC, not 7 days from activation.",
+    "A single check selects one operation. Enable a reviewed catch-up schedule or use separate fast reserve maintenance; weekly checks alone cannot guarantee queue progress."
+  ],
+  "targetAddress": "0x0196b1fd654fcC5A61fe6E9431b39Be88BB32FFE"
+}

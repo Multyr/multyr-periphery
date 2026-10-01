@@ -1,0 +1,395 @@
+{
+  "deploymentDate": "2026-09-25",
+  "chainId": 42161,
+  "contracts": {
+    "AaveV3WarmAdapter_USDC": "0x03d18504Fe39007cebc8d288CB5734826D13dB5d",
+    "AdminModule": "0xa5DCdFE5EADefc996AfafCE1CB14eCf17710721a",
+    "BufferManager": "0xeC5aa85dA559943420e1464F6bE5Ec44aCe157e1",
+    "ERC4626Module": "0x99FA9D0eB86Ca2a2e8D3A32b7568cF9521c81f84",
+    "FeeCollector": "0x7976b59B66580e6340aC06Cf750e5C654DAa4B9a",
+    "GlobalConfig": "0x04BA2Be680710B3Fae236bbFe18A5890A3829f98",
+    "StrategyHealthRegistry": "0x76C1f6c2AA37500E462543eCF28a52838A91eCf0",
+    "LiquidityOpsModule": "0x282194B96c3F6ebBE3933bfF0eFb60CdEca95838",
+    "MorphoVaultWarmAdapter_USDC": "0x456F5f72882434CB13735e46381907010BEA1d80",
+    "PriceOracleMiddleware": "0x775B60e355A66b45D8d89b2DDe8D806d48e3C958",
+    "EpochedQueueModule": "0x97a61f826352C93add598eD4e8d0A3a5F7D481B5",
+    "RecoveryGate": "0x93043838B62Ba89ae09Be499baF25Fb96e969De8",
+    "SelectorRegistry": "0xa91E4900bFE244515EaFd7e5Ba7c75dE197AB93a",
+    "StrategyRouter": "0x9E3C383092bd98Ce6b821Db5dD51fC5A9ccb231E",
+    "SystemSealer": "0xC8De5fCde3e6a75c56AE16182f2032fb074d65B4",
+    "VaultUpkeep": "0x0196b1fd654fcC5A61fe6E9431b39Be88BB32FFE",
+    "CoreVault": "0x70c8F05fC599e96D1BB9ce6e9dc3e1d72A9A3d01",
+    "VaultFactory": "0xa762B044C216c699A0bB1d0B7eA169a1716EB62d",
+    "AaveV3USDCAdapter": "0x8b2Ca25cE2670D1e37037AD3b1fFb06B7Df793fe",
+    "AaveLiquidityRateProvider": "0x6f9b6A062d0C1bcb92B3b0385868a132BfBe2923",
+    "AdapterFactory": "0x3FEe7E69b6836b69bb964e4959063B60F66A1982",
+    "StrategyAdapterOpsModule": "0x2901a188B2EeeE1D08B9CAA9731c982e72CA3fbe",
+    "StrategyAllocCalcModule": "0x37A1b4bf8CE2f74718ca298A7AA3a71F16b543cE",
+    "StrategyBootstrapper": "0xaF26a2eBC5b87be97A325C573A78B5A50e8A18f9",
+    "CometUsdcMultiMarketAdapter": "0x96d5F520e1b1E046aB4417867d63FCcc59467432",
+    "DolomiteUsdcMultiMarketAdapter": "0x2aa571DA63893C265bB1F0d43DF1070ce691a303",
+    "DolomiteSupplyRateProvider": "0x333141aB6950306e61B462242C66D4fc0A9C544D",
+    "EulerUsdcMultiMarketAdapter": "0x01e380438C013211A4f27A80cE316E0144cF1233",
+    "FluidUsdcMultiMarketAdapter": "0xc0FD5677823c8dB31E87C0B7384fcF580987C4c7",
+    "MorphoUsdcMultiMarketAdapter": "0x9493400E0c861774f4e264492E658805B58F8Ba2",
+    "StrategyParamsModule": "0x37E2777453Db321813cC454B1D4F53aEd90B7f96",
+    "ProtocolRegistry": "0x35C60279Ef3d8D0E904f094c094654AB23DCEE6f",
+    "StrategyRebalanceGateModule": "0xB6359AaF920B6879f54B1fa490Ea2d8F0a4BfFd1",
+    "StrategyRebalancePlanModule": "0x6f06351DE9c6C0575C40BA5EaE881fB1E2d38Ea9",
+    "StrategyScoringModule": "0xD163A33FA5DA94109eFeC3eC65e7a252b415156A",
+    "StrategySettingsModule": "0xc2cfC76C3a03d2D3A71065Fa64D6e2281cf1bD3c",
+    "UsdcMultiLendingVault": "0xCC4A4A4CbB5e041ffE6CAc44D6F7F84B6F6cAEf1",
+    "StrategyUpkeep": "0xA01Aa76C782569691Aaf6A0790124Bd3E5Ff3ee6",
+    "ClaimSettlementUpkeep": "0xD8CE7eA661A7E818337ad87E7bb87b56871da14E",
+    "VenusUsdcMultiMarketAdapter": "0xC9c1c7257Ab5161c4E77C10a26544b0B11d3419b"
+  },
+  "workflows": [
+    {
+      "name": "multyr-core-v2",
+      "kind": "upkeep",
+      "mode": "preview",
+      "triggers": [
+        {
+          "name": "weekly",
+          "schedule": "0 0 0 * * 1",
+          "actionIds": [],
+          "enabled": true
+        },
+        {
+          "name": "catch-up",
+          "schedule": "0 */10 * * * *",
+          "actionIds": [],
+          "enabled": false
+        }
+      ],
+      "notes": [
+        "September 25 deployment; weekly means Monday 00:00 UTC, not 7 days from activation.",
+        "A single check selects one operation. Enable a reviewed catch-up schedule or use separate fast reserve maintenance; weekly checks alone cannot guarantee queue progress."
+      ]
+    },
+    {
+      "name": "multyr-lending-v2",
+      "kind": "upkeep",
+      "mode": "preview",
+      "triggers": [
+        {
+          "name": "daily",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        },
+        {
+          "name": "catch-up",
+          "schedule": "0 5-55/10 * * * *",
+          "actionIds": [],
+          "enabled": false
+        }
+      ],
+      "notes": [
+        "Daily 00:00 UTC. APY priority can starve later work without catch-up; verify pokeInterval and plan expiry.",
+        "One write per run; receipt success is not proof that harvested/rebalanced state advanced."
+      ]
+    },
+    {
+      "name": "multyr-claims",
+      "kind": "upkeep",
+      "mode": "preview",
+      "triggers": [
+        {
+          "name": "catch-up",
+          "schedule": "0 */10 * * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Continuous polling catches funded epochs and retries; default local upkeep batch is 20 claims, verify deployed values.",
+        "Pays recorded claim owners through the deployed claim upkeep."
+      ]
+    },
+    {
+      "name": "multyr-fees",
+      "kind": "calls",
+      "mode": "preview",
+      "triggers": [
+        {
+          "name": "weekly-distribution",
+          "schedule": "0 0 0 * * 1",
+          "actionIds": [
+            "distribute-shares"
+          ],
+          "enabled": true
+        },
+        {
+          "name": "queued-cleanup",
+          "schedule": "0 5-55/10 * * * *",
+          "actionIds": [
+            "harvest-queued"
+          ],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Weekly distribution plus ten-minute queued cleanup are separate handlers in one slot.",
+        "AUTO_HARVEST must be configured where intended. Preflight rejects an unready queue; errors are reported, never treated as payouts.",
+        "Direct FeeCollector calls; no nonexistent FeeCollectorUpkeep address. Add approved underlying token distributions if required."
+      ]
+    },
+    {
+      "name": "multyr-liquidity",
+      "kind": "calls",
+      "mode": "preview",
+      "triggers": [
+        {
+          "name": "batch-0",
+          "schedule": "0 */5 * * * *",
+          "actionIds": [
+            "batch-0"
+          ],
+          "enabled": true
+        },
+        {
+          "name": "batch-1",
+          "schedule": "5 */5 * * * *",
+          "actionIds": [
+            "batch-1"
+          ],
+          "enabled": true
+        },
+        {
+          "name": "batch-2",
+          "schedule": "10 */5 * * * *",
+          "actionIds": [
+            "batch-2"
+          ],
+          "enabled": true
+        },
+        {
+          "name": "batch-3",
+          "schedule": "15 */5 * * * *",
+          "actionIds": [
+            "batch-3"
+          ],
+          "enabled": true
+        },
+        {
+          "name": "batch-4",
+          "schedule": "20 */5 * * * *",
+          "actionIds": [
+            "batch-4"
+          ],
+          "enabled": true
+        },
+        {
+          "name": "batch-5",
+          "schedule": "25 */5 * * * *",
+          "actionIds": [
+            "batch-5"
+          ],
+          "enabled": true
+        },
+        {
+          "name": "batch-6",
+          "schedule": "30 */5 * * * *",
+          "actionIds": [
+            "batch-6"
+          ],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Seven bounded batch handlers in ONE workflow slot; seven executions every five minutes if all enabled.",
+        "Ranges index the CURRENT ENABLED adapter list, not deployment order. Verify membership and remove unused handlers before enabling live mode.",
+        "Each handler submits at most one report. Gas must fit the worst funded adapter, including receiver overhead."
+      ]
+    },
+    {
+      "name": "multyr-warm-nav",
+      "kind": "calls",
+      "mode": "preview",
+      "triggers": [
+        {
+          "name": "refresh",
+          "schedule": "0 */5 * * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Five-minute proposed refresh against historical 600-second interval; verify actual thresholds and need.",
+        "Permissionless refresh; transaction delivery is not proof of valid NAV, use monitoring. Can be merged with another data-maintenance workflow."
+      ]
+    },
+    {
+      "name": "multyr-monitor",
+      "kind": "monitor",
+      "mode": "preview",
+      "triggers": [
+        {
+          "name": "observe",
+          "schedule": "0 */5 * * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Structured CRE logs and returned observations only; wire external alert delivery separately.",
+        "Baseline 11 observations, not exhaustive telemetry of all 40 contracts. Read errors are explicit. No policy writes.",
+        "Paused=true is expected during shadow setup; adjust expectations only after review."
+      ]
+    },
+    {
+      "name": "multyr-position-sync",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "PARAM_ROLE required; existing rebalance/deploy paths already sync. Choose drift policy before adding writes.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    },
+    {
+      "name": "multyr-adapter-accrual",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Venus accrual is permissionless. Morpho refresh is onlyVault and cannot be called directly by a CRE receiver; implement/verify a routed forwarding path.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    },
+    {
+      "name": "multyr-rate-feed",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Placeholder market/rate, NOT approved values. Only needed if active market uses this provider; owner-only, requires verified source and units. No external data integration or policy invented.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    },
+    {
+      "name": "multyr-risk-policy",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Risk/regime zero values are placeholders, not decisions. Requires approved scoring policy and appropriate PARAM_ROLE/KEEPER_ROLE.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    },
+    {
+      "name": "multyr-registry-sync",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Only after an approved registry update. Review metadata diff, parameter permissions, and adapter compatibility.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    },
+    {
+      "name": "multyr-health-policy",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Owner/guardian policy required; guardian cannot restore OK. This is not an autonomous emergency policy.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    },
+    {
+      "name": "multyr-plan-recovery",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Requires approved stale/stuck-plan decision and KEEPER_ROLE. No automatic cancellation.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    },
+    {
+      "name": "multyr-emergency",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Operator-approved incident response only; owner/admin permissions and withdrawAll compatibility require validation.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    },
+    {
+      "name": "multyr-governance",
+      "kind": "policy-preview",
+      "mode": "disabled",
+      "triggers": [
+        {
+          "name": "review",
+          "schedule": "0 0 0 * * *",
+          "actionIds": [],
+          "enabled": true
+        }
+      ],
+      "notes": [
+        "Group 0 is a placeholder. Requires exact approved proposal/digest, delay, veto and expiry checks. No autonomous governance execution.",
+        "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+      ]
+    }
+  ]
+}

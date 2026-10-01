@@ -1,0 +1,41 @@
+{
+  "mode": "disabled",
+  "kind": "policy-preview",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "review",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Group 0 is a placeholder. Requires exact approved proposal/digest, delay, veto and expiry checks. No autonomous governance execution.",
+    "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+  ],
+  "actions": [
+    {
+      "id": "execute-recovery",
+      "target": "0x93043838B62Ba89ae09Be499baF25Fb96e969De8",
+      "signature": "function execute(uint8)",
+      "args": [
+        "0"
+      ],
+      "guards": [],
+      "enabled": false
+    },
+    {
+      "id": "execute-approver",
+      "target": "0x93043838B62Ba89ae09Be499baF25Fb96e969De8",
+      "signature": "function executeApproverChange()",
+      "args": [],
+      "guards": [],
+      "enabled": false
+    }
+  ],
+  "observations": []
+}

@@ -1,0 +1,34 @@
+{
+  "mode": "disabled",
+  "kind": "policy-preview",
+  "chainSelectorName": "ethereum-mainnet-arbitrum-1",
+  "receiverAddress": "0x0000000000000000000000000000000000000000",
+  "writeGasLimit": "0",
+  "deploymentVerified": false,
+  "triggers": [
+    {
+      "name": "review",
+      "schedule": "0 0 0 * * *",
+      "actionIds": [],
+      "enabled": true
+    }
+  ],
+  "notes": [
+    "Placeholder market/rate, NOT approved values. Only needed if active market uses this provider; owner-only, requires verified source and units. No external data integration or policy invented.",
+    "Enforced preview-only by engine: live mode is rejected. Enable individual preview actions only after replacing placeholders."
+  ],
+  "actions": [
+    {
+      "id": "dolomite-rate",
+      "target": "0x333141aB6950306e61B462242C66D4fc0A9C544D",
+      "signature": "function setSupplyRatePerSecond(address,uint256)",
+      "args": [
+        "0x0000000000000000000000000000000000000000",
+        "0"
+      ],
+      "guards": [],
+      "enabled": false
+    }
+  ],
+  "observations": []
+}
