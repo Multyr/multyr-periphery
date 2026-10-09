@@ -2,7 +2,7 @@
 
 A keeper bot for Multyr automation that is not tied to any one provider. It
 covers the six primary workflows (W1–W6) of the Arbitrum One deployment of
-2026-09-25.
+2026-10-09.
 
 The bot makes **no allocation or strategy decisions.** It reads on-chain state
 and calls the existing keeper entrypoints. All eligibility rules, thresholds,
@@ -25,12 +25,12 @@ Both instances run the same code and the same image. Only their environment diff
 
 | ID | Target (Arbitrum One) | Call | Permission needed by bot | Trigger used | If both bots fire |
 |---|---|---|---|---|---|
-| W1 | VaultUpkeep `0x0196…2FFE` | `checkUpkeep` → `performUpkeep(performData)` | none (permissionless) | poll 120s; on-chain priority, cooldowns and backoff decide | inner call fails and is caught; increments `consecutiveFailures` (see note 1) |
-| W2 | StrategyUpkeep `0xA01A…3ee6` | `checkUpkeep` → `performUpkeep(performData)` | none (permissionless) | poll 300s; `pokeInterval` and the strategy's own cooldowns decide | `performUpkeep` re-checks cooldowns and reverts in simulation, so no tx is sent |
-| W3 | ClaimSettlementUpkeep `0xD8CE…a14E` | `checkUpkeep` → `performUpkeep` | none (permissionless) | poll 120s, up to 25 batches per tick | ignores caller data, rescans chain state, no-ops if nothing is left |
-| W4 | FeeCollector `0x7976…Aa4B9a` | `harvestQueued(token)`, `distribute(token)` | none (permissionless) | `distribute` only in a weekly UTC window (default Mon 10:00, 6h); `harvestQueued` whenever claims are pending | both revert when nothing is left, so the second call fails simulation and no tx is sent |
-| W5 | Strategy vault `0xCC4A…AEf1` | `pokeLiquidityBatch(start,end)` | **`KEEPER_ROLE` on the strategy vault, granted to each bot address** | only batches whose cached liquidity is within the margin of expiry | idempotent; costs gas only |
-| W6 | BufferManager `0xeC5a…57e1` | `refreshWarmNav()` | none (permissionless) | `warmNavState.ts + navRefreshInterval − margin`, or `valid == false` | idempotent; costs gas only |
+| W1 | VaultUpkeep `0xCD31…B55f` | `checkUpkeep` → `performUpkeep(performData)` | none (permissionless) | poll 240s; on-chain priority, cooldowns and backoff decide | inner call fails and is caught; increments `consecutiveFailures` (see note 1) |
+| W2 | StrategyUpkeep `0x0520…eFc3` | `checkUpkeep` → `performUpkeep(performData)` | none (permissionless) | poll 600s; `pokeInterval` and the strategy's own cooldowns decide | `performUpkeep` re-checks cooldowns and reverts in simulation, so no tx is sent |
+| W3 | ClaimSettlementUpkeep `0x4e84…1260` | `checkUpkeep` → `performUpkeep` | none (permissionless) | poll 240s, up to 25 batches per tick | ignores caller data, rescans chain state, no-ops if nothing is left |
+| W4 | FeeCollector `0x6917…9e92` | `harvestQueued(token)`, `distribute(token)` | none (permissionless) | `distribute` only in a weekly UTC window (default Mon 10:00, 6h); `harvestQueued` whenever claims are pending | both revert when nothing is left, so the second call fails simulation and no tx is sent |
+| W5 | Strategy vault `0x7bF0…24E2` | `pokeLiquidityBatch(start,end)` | **`KEEPER_ROLE` on the strategy vault, granted to each bot address** | only batches whose cached liquidity is within the margin of expiry | idempotent; costs gas only |
+| W6 | BufferManager `0x9b3f…0D96` | `refreshWarmNav()` | none (permissionless) | `warmNavState.ts + navRefreshInterval − margin`, or `valid == false` | idempotent; costs gas only |
 
 How each tick works:
 
@@ -47,6 +47,10 @@ How each tick works:
 - The two bots use separate addresses, so there is no nonce contention between them. Within one bot, jobs run sequentially, so there is at most one in-flight tx.
 
 ## Usage
+
+For the separate seven-adapter cycle from the September 29 PDF, see
+[the local-fork replay script](scripts/README.md). It covers the recorded
+admin and user actions without changing the production keeper jobs.
 
 Requires Node ≥ 22.18. TypeScript runs directly through Node's type stripping, with no build step.
 
@@ -89,3 +93,20 @@ See `deploy/*.env.example` for the primary (AWS KMS), secondary (GCP KMS) and sh
 
 1. **VaultUpkeep is the one target where a duplicate call has a side effect.** Its `performUpkeep` trusts `performData` without re-checking eligibility. An ineligible op fails inside try/catch and increments `consecutiveFailures`; at 3 failures the upkeep backs off for 30 minutes. This holds for *any* caller, so it is a griefing surface under Chainlink or CRE too. The secondary's grace window keeps the two bots from colliding, but the contract-level fix is to re-validate in `performUpkeep` (e.g. compare against `checkUpkeep`) and to skip the failure counter on mismatch.
 2. W2 under-reports one thing: `StrategyUpkeep._performPokeAPY` sets `lastPokeTs` even when individual targets fail. The bot raises those failures as alerts from `SnapshotPokeFailed` and `ExternalTVLPokeFailed`.
+
+## Temporary AWS simulation profile (9 October 2026)
+
+The AWS template in `deploy/aws/stack.json` starts `check-loop`, which runs the
+normal scheduler with simulation-only writes and never loads a signer. Set
+`SIGNER=none` and `KEEPER_ADDRESS=0x404da3b474b8b4c87d5e3c39230c71a7237630da`.
+The prepared task role has no KMS permissions; keeper funding is not needed.
+Polling is W1/W3/W5 every 240 seconds, W2 every 600 seconds, W4 every 1800
+seconds and W6 every 120 seconds. Simulations do not persist state, so due work
+can appear repeatedly until somebody executes it on-chain. A successful outer
+eth_call does not prove every internally caught operation succeeded.
+
+AWS authentication now works, and the simulation image is published in the
+private ECR repository. Provisioning is blocked on an administrator creating the
+ECS execution role and granting scoped PassRole permission; see
+[deployment instructions](deploy/aws/README.md). No service is running yet. The
+3-USDC deposit remains pending while the task is restricted to simulations.

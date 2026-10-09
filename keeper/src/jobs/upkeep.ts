@@ -111,22 +111,32 @@ export class UpkeepJob implements Job {
         break;
       }
       actions++;
-      await this.inspectReceipt(res.receipt, op);
+      if (await this.inspectReceipt(res.receipt, op)) {
+        // checkUpkeep usually still returns the same op after an inner failure;
+        // re-sending it would only feed VaultUpkeep's failure counter / backoff.
+        log.warn("inner operation failed; ending follow-ups for this tick", { job: this.id, ...op });
+        break;
+      }
     }
     return { due, actions };
   }
 
-  /** Inner calls are try/caught on-chain; surface their failures from events. */
-  private async inspectReceipt(receipt: TransactionReceipt, op: Record<string, unknown>): Promise<void> {
+  /**
+   * Inner calls are try/caught on-chain; surface their failures from events.
+   * Returns true if any inner operation failed.
+   */
+  private async inspectReceipt(receipt: TransactionReceipt, op: Record<string, unknown>): Promise<boolean> {
     const logs = parseEventLogs({ abi: this.abi, logs: receipt.logs }).filter((l) =>
       sameAddress(l.address, this.cfg.target),
     );
     const tx = receipt.transactionHash;
+    let failed = false;
     for (const l of logs as any[]) {
       const a = l.args;
       switch (`${this.cfg.flavor}:${l.eventName}`) {
         case "vault:UpkeepPerformed":
           if (!a.success) {
+            failed = true;
             await alert(`${this.id}:op-failed:${VAULT_OPS[a.op]}`, `${this.id} ${VAULT_OPS[a.op]} inner call failed`, {
               arg: a.arg,
               tx,
@@ -134,9 +144,11 @@ export class UpkeepJob implements Job {
           } else log.info("vault op ok", { job: this.id, op: VAULT_OPS[a.op], arg: a.arg, tx });
           break;
         case "vault:UpkeepBackoffEntered":
+          failed = true;
           await alert(`${this.id}:backoff`, `${this.id} VaultUpkeep entered failure backoff`, { failures: a.failures, tx });
           break;
         case "strategy:UpkeepErrored":
+          failed = true;
           await alert(`${this.id}:errored:${a.op}`, `${this.id} ${STRATEGY_OPS[a.op] ?? a.op} errored`, {
             strategy: a.strategy,
             reason: a.reason,
@@ -146,12 +158,14 @@ export class UpkeepJob implements Job {
         case "strategy:SnapshotPokeFailed":
         case "strategy:ExternalTVLPokeFailed":
         case "strategy:ExternalCallFailed":
+          failed = true;
           await alert(`${this.id}:${l.eventName}:${a.target ?? a.strategy}`, `${this.id} ${l.eventName}`, {
             ...a,
             tx,
           });
           break;
         case "claims:ClaimSettlementFailed":
+          failed = true;
           await alert(`${this.id}:claim-failed`, `${this.id} claim settlement failed (retry scheduled on-chain)`, {
             epochId: a.epochId,
             claimId: a.claimId,
@@ -165,6 +179,7 @@ export class UpkeepJob implements Job {
       }
     }
     log.debug("upkeep receipt inspected", { job: this.id, ...op, events: logs.length });
+    return failed;
   }
 
   async preflight({ chain, cfg }: JobContext): Promise<PreflightCheck[]> {

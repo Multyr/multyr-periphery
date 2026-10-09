@@ -49,6 +49,7 @@ export class ChainClient {
   readonly dryRun: boolean;
   private readonly maxFeePerGas: bigint;
   private readonly receiptTimeoutMs: number;
+  private readonly gasLimitMultiplier: number;
 
   constructor(cfg: Config, account: LocalAccount | undefined, opts: { dryRun: boolean; from?: Address }) {
     const chain = KNOWN_CHAINS[cfg.chain.chainId];
@@ -61,6 +62,7 @@ export class ChainClient {
     this.dryRun = opts.dryRun;
     this.maxFeePerGas = parseGwei(String(cfg.chain.maxFeePerGasGwei));
     this.receiptTimeoutMs = cfg.chain.txReceiptTimeoutSec * 1000;
+    this.gasLimitMultiplier = cfg.chain.gasLimitMultiplier;
   }
 
   async now(): Promise<number> {
@@ -101,12 +103,19 @@ export class ChainClient {
     if ((fees.maxFeePerGas ?? 0n) > this.maxFeePerGas) {
       return { status: "skipped", reason: `fee ${fees.maxFeePerGas} above cap ${this.maxFeePerGas}` };
     }
+    // eth_estimateGas finds the least gas at which the OUTER call succeeds. Upkeeps
+    // wrap their work in try/catch, so that amount can starve the inner call
+    // (63/64 rule) while the tx still "succeeds". Send with headroom instead;
+    // only gas actually used is paid.
+    const estimate = await this.pub.estimateContractGas(request as any);
+    const gas = (estimate * BigInt(Math.round(this.gasLimitMultiplier * 100))) / 100n;
     const hash = await this.wallet.writeContract({
       ...(request as any),
+      gas,
       maxFeePerGas: this.maxFeePerGas,
       maxPriorityFeePerGas: fees.maxPriorityFeePerGas ?? 0n,
     });
-    log.info("tx sent", { label: req.label, hash });
+    log.info("tx sent", { label: req.label, hash, gasEstimate: estimate, gasLimit: gas });
     const receipt = await this.pub.waitForTransactionReceipt({ hash, timeout: this.receiptTimeoutMs });
     log.info("tx mined", {
       label: req.label,

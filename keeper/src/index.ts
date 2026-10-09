@@ -7,15 +7,16 @@ import { configureAlerts, log, setLogContext } from "./log.ts";
 import { buildJobs, runLoop, runOnce, runPreflight } from "./runner.ts";
 import { loadSigner } from "./signers/index.ts";
 
-const USAGE = `usage: node src/index.ts <run|once|check|preflight>
+const USAGE = `usage: node src/index.ts <run|once|check|check-loop|preflight>
   run        long-running loop (container / VM)
   once       evaluate every job once and exit (cron / Cloud Run job / Lambda)
   check      like once, but simulate only — never sends a transaction
+  check-loop long-running simulation loop — never loads a signer or sends
   preflight  verify wiring, roles and config against the chain; exit 1 on any FAIL`;
 
 async function main(): Promise<number> {
   const mode = process.argv[2];
-  if (!["run", "once", "check", "preflight"].includes(mode ?? "")) {
+  if (!["run", "once", "check", "check-loop", "preflight"].includes(mode ?? "")) {
     console.error(USAGE);
     return 2;
   }
@@ -24,10 +25,11 @@ async function main(): Promise<number> {
   setLogContext({ instance: cfg.env.instance, network: cfg.chain.network, mode });
   configureAlerts(cfg.env.alertWebhookUrl);
 
-  const account = await loadSigner(cfg.env);
+  const account = mode === "check-loop" ? undefined : await loadSigner(cfg.env);
   const from = account?.address ?? (process.env.KEEPER_ADDRESS ? getAddress(process.env.KEEPER_ADDRESS) : undefined);
+  if (mode === "check-loop" && !from) throw new Error("KEEPER_ADDRESS required for check-loop");
   const chain = new ChainClient(cfg, account, { dryRun: !sends, from });
-  const ctx: JobContext = { chain, cfg, gate: new DueGate(cfg.env.instance, mode !== "run") };
+  const ctx: JobContext = { chain, cfg, gate: new DueGate(cfg.env.instance, mode !== "run" && mode !== "check-loop") };
   const jobs = buildJobs(cfg);
   log.info("keeper starting", { keeper: from, jobs: jobs.map((j) => j.id) });
 
@@ -38,7 +40,7 @@ async function main(): Promise<number> {
     }
     return checks.some((c) => c.level === "fail") ? 1 : 0;
   }
-  if (mode === "run") {
+  if (mode === "run" || mode === "check-loop") {
     await runLoop(jobs, ctx);
     return 0;
   }

@@ -154,19 +154,15 @@ test("upkeep: inner failure and backoff events become alerts", async () => {
 // Found on the Arbitrum fork: the gas estimate starves the try/caught inner
 // call, checkUpkeep stays true, and the loop re-sends the same failing op until
 // VaultUpkeep's own failure counter puts it into a 30-minute backoff.
-test(
-  "upkeep: does not re-send an op whose inner call just failed",
-  { todo: "bot keeps looping after UpkeepPerformed(success=false); see fork findings" },
-  async () => {
-    const failed = receipt([eventLog(vaultUpkeepAbi, "UpkeepPerformed", { op: 3, arg: 0n, success: false })]);
-    const { ctx, sent } = fakeCtx({
-      reads: () => [true, vaultData(3)],
-      writes: () => ({ status: "mined", receipt: failed }),
-    });
-    await new UpkeepJob(upkeepCfg()).tick(ctx);
-    assert.equal(sent.length, 1);
-  },
-);
+test("upkeep: does not re-send an op whose inner call just failed", async () => {
+  const failed = receipt([eventLog(vaultUpkeepAbi, "UpkeepPerformed", { op: 3, arg: 0n, success: false })]);
+  const { ctx, sent } = fakeCtx({
+    reads: () => [true, vaultData(3)],
+    writes: () => ({ status: "mined", receipt: failed }),
+  });
+  assert.deepEqual(await new UpkeepJob(upkeepCfg()).tick(ctx), { due: true, actions: 1 });
+  assert.equal(sent.length, 1);
+});
 
 test("upkeep: secondary defers in run mode, then acts after grace; clears when no longer due", async () => {
   let due = true;

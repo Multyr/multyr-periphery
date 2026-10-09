@@ -7,6 +7,9 @@
   "type": "module",
   "engines": { "node": ">=22.18" },
   "scripts": {
+    "cycle:plan": "node scripts/pdf-cycle.ts plan",
+    "cycle:replay": "node scripts/pdf-cycle.ts replay",
+    "cycle:keepers": "node scripts/keeper-cycle.ts",
     "start": "node src/index.ts run",
     "once": "node src/index.ts once",
     "check": "node src/index.ts check",

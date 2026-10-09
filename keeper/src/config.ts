@@ -63,6 +63,8 @@ export interface ChainConfig {
   /** Hard cap; a tx is not sent while the network base fee is above it. */
   maxFeePerGasGwei: number;
   txReceiptTimeoutSec: number;
+  /** Gas limit = estimate × this. Headroom for try/catch inner calls the estimate can starve. */
+  gasLimitMultiplier: number;
   minKeeperBalanceEth: number;
   /** Reference addresses used by preflight cross-checks. */
   addresses: Record<string, Address>;
@@ -176,6 +178,7 @@ export function parseChainConfig(raw: any): ChainConfig {
     chainId: num(raw.chainId, "chainId", 1),
     maxFeePerGasGwei: num(raw.maxFeePerGasGwei, "maxFeePerGasGwei"),
     txReceiptTimeoutSec: num(raw.txReceiptTimeoutSec, "txReceiptTimeoutSec", 10),
+    gasLimitMultiplier: num(raw.gasLimitMultiplier ?? 1.5, "gasLimitMultiplier", 1),
     minKeeperBalanceEth: num(raw.minKeeperBalanceEth, "minKeeperBalanceEth"),
     addresses,
     jobs,
