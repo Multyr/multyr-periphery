@@ -1,0 +1,84 @@
+{
+  "network": "arbitrum-one",
+  "chainId": 42161,
+  "maxFeePerGasGwei": 1,
+  "txReceiptTimeoutSec": 120,
+  "gasLimitMultiplier": 1.5,
+  "minKeeperBalanceEth": 0.005,
+  "addresses": {
+    "coreVault": "0x5e0cdb76487BD96Ff069Ef7F78eaDF5b5909C8cb",
+    "strategyVault": "0x7bF0f446BB20b54597E66a602cB94D0F231D24E2",
+    "vaultUpkeep": "0xCD31634F472Fcc1D0b64FAE3ed72Bb7C0792B55f",
+    "strategyUpkeep": "0x05202b06647d4597fB851162A1E32AA8437EeFc3",
+    "claimSettlementUpkeep": "0x4e845762e66518f34641326C7f77fAf4B81c1260",
+    "feeCollector": "0x6917CE91cdC284e637EF51Dc844feFca83789e92",
+    "bufferManager": "0x9b3fE5c76e0C10de254Ee2153f71DF6a96020D96",
+    "usdc": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+  },
+  "jobs": [
+    {
+      "id": "W1",
+      "type": "upkeep",
+      "flavor": "vault",
+      "target": "0xCD31634F472Fcc1D0b64FAE3ed72Bb7C0792B55f",
+      "pollSec": 240,
+      "maxActionsPerTick": 10,
+      "secondaryGraceSec": 900
+    },
+    {
+      "id": "W2",
+      "type": "upkeep",
+      "flavor": "strategy",
+      "target": "0x05202b06647d4597fB851162A1E32AA8437EeFc3",
+      "pollSec": 600,
+      "maxActionsPerTick": 10,
+      "secondaryGraceSec": 1800
+    },
+    {
+      "id": "W3",
+      "type": "upkeep",
+      "flavor": "claims",
+      "target": "0x4e845762e66518f34641326C7f77fAf4B81c1260",
+      "pollSec": 240,
+      "maxActionsPerTick": 25,
+      "secondaryGraceSec": 900
+    },
+    {
+      "id": "W4",
+      "type": "feeCollector",
+      "target": "0x6917CE91cdC284e637EF51Dc844feFca83789e92",
+      "distributeTokens": [
+        "0x5e0cdb76487BD96Ff069Ef7F78eaDF5b5909C8cb",
+        "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+      ],
+      "harvestQueuedTokens": [
+        "0x5e0cdb76487BD96Ff069Ef7F78eaDF5b5909C8cb"
+      ],
+      "distributeWindow": {
+        "weekday": 1,
+        "hourUtc": 10,
+        "durationHours": 6
+      },
+      "pollSec": 1800,
+      "secondaryGraceSec": 3600
+    },
+    {
+      "id": "W5",
+      "type": "liquidity",
+      "strategyVault": "0x7bF0f446BB20b54597E66a602cB94D0F231D24E2",
+      "batchSize": 4,
+      "refreshMarginSec": 300,
+      "fallbackMaxAgeSec": 3600,
+      "pollSec": 240,
+      "secondaryGraceSec": 600
+    },
+    {
+      "id": "W6",
+      "type": "warmNav",
+      "bufferManager": "0x9b3fE5c76e0C10de254Ee2153f71DF6a96020D96",
+      "refreshMarginSec": 120,
+      "pollSec": 120,
+      "secondaryGraceSec": 180
+    }
+  ]
+}

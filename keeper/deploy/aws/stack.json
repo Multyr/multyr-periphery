@@ -1,0 +1,420 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Single Multyr W1-W6 keeper; existing KMS key; no NAT gateway or load balancer. Stop-before-start updates prevent duplicate use of one signer. Simulation only; task has no KMS signing permissions.",
+  "Parameters": {
+    "KmsKeyArn": {
+      "Type": "String",
+      "AllowedPattern": "arn:aws:kms:eu-north-1:[0-9]{12}:key/.+"
+    },
+    "ImageUri": {
+      "Type": "String"
+    },
+    "DesiredCount": {
+      "Type": "Number",
+      "Default": 0,
+      "AllowedValues": [
+        0,
+        1
+      ]
+    }
+  },
+  "Resources": {
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.73.0.0/24",
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true
+      }
+    },
+    "Gateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {}
+    },
+    "GatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "InternetGatewayId": {
+          "Ref": "Gateway"
+        }
+      }
+    },
+    "Subnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "CidrBlock": "10.73.0.0/25",
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        }
+      }
+    },
+    "Routes": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "InternetRoute": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "Routes"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "Gateway"
+        }
+      },
+      "DependsOn": "GatewayAttachment"
+    },
+    "SubnetRoutes": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "Subnet"
+        },
+        "RouteTableId": {
+          "Ref": "Routes"
+        }
+      }
+    },
+    "SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "GroupDescription": "Keeper outbound HTTPS only; no inbound access",
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "Repository": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "RepositoryName": "multyr-keeper",
+        "ImageScanningConfiguration": {
+          "ScanOnPush": true
+        },
+        "ImageTagMutability": "IMMUTABLE"
+      },
+      "DeletionPolicy": "Retain",
+      "UpdateReplacePolicy": "Retain"
+    },
+    "Logs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/ecs/multyr-keeper",
+        "RetentionInDays": 14
+      }
+    },
+    "TaskRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                  }
+                },
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                  }
+                },
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:ecs:${AWS::Region}:${AWS::AccountId}:*"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "PullImageAndWriteLogs",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ecr:GetAuthorizationToken"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ecr:BatchCheckLayerAvailability",
+                    "ecr:GetDownloadUrlForLayer",
+                    "ecr:BatchGetImage"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "Repository",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "Logs",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Cluster": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {
+        "ClusterName": "multyr-keeper"
+      }
+    },
+    "Task": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "Family": "multyr-keeper",
+        "Cpu": "256",
+        "Memory": "512",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": [
+          "FARGATE"
+        ],
+        "RuntimePlatform": {
+          "CpuArchitecture": "X86_64",
+          "OperatingSystemFamily": "LINUX"
+        },
+        "TaskRoleArn": {
+          "Fn::GetAtt": [
+            "TaskRole",
+            "Arn"
+          ]
+        },
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": [
+            "ExecutionRole",
+            "Arn"
+          ]
+        },
+        "ContainerDefinitions": [
+          {
+            "Name": "keeper",
+            "Image": {
+              "Ref": "ImageUri"
+            },
+            "Essential": true,
+            "ReadonlyRootFilesystem": true,
+            "StopTimeout": 120,
+            "Environment": [
+              {
+                "Name": "KEEPER_INSTANCE",
+                "Value": "primary"
+              },
+              {
+                "Name": "KEEPER_CONFIG",
+                "Value": "config/arbitrum-one.json"
+              },
+              {
+                "Name": "AWS_REGION",
+                "Value": {
+                  "Ref": "AWS::Region"
+                }
+              },
+              {
+                "Name": "RPC_URLS",
+                "Value": "https://arb1.arbitrum.io/rpc"
+              },
+              {
+                "Name": "PORT",
+                "Value": "8080"
+              },
+              {
+                "Name": "LOG_LEVEL",
+                "Value": "info"
+              },
+              {
+                "Name": "SIGNER",
+                "Value": "none"
+              },
+              {
+                "Name": "KEEPER_ADDRESS",
+                "Value": "0x404da3b474b8b4c87d5e3c39230c71a7237630da"
+              }
+            ],
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "Logs"
+                },
+                "awslogs-region": {
+                  "Ref": "AWS::Region"
+                },
+                "awslogs-stream-prefix": "keeper"
+              }
+            },
+            "HealthCheck": {
+              "Command": [
+                "CMD",
+                "node",
+                "-e",
+                "fetch('http://127.0.0.1:8080/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+              ],
+              "Interval": 30,
+              "Timeout": 5,
+              "Retries": 3,
+              "StartPeriod": 120
+            },
+            "Command": [
+              "check-loop"
+            ]
+          }
+        ]
+      }
+    },
+    "Service": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "ServiceName": "multyr-keeper",
+        "Cluster": {
+          "Ref": "Cluster"
+        },
+        "TaskDefinition": {
+          "Ref": "Task"
+        },
+        "LaunchType": "FARGATE",
+        "DesiredCount": {
+          "Ref": "DesiredCount"
+        },
+        "DeploymentConfiguration": {
+          "MinimumHealthyPercent": 0,
+          "MaximumPercent": 100,
+          "DeploymentCircuitBreaker": {
+            "Enable": true,
+            "Rollback": true
+          }
+        },
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "Subnets": [
+              {
+                "Ref": "Subnet"
+              }
+            ],
+            "SecurityGroups": [
+              {
+                "Ref": "SecurityGroup"
+              }
+            ]
+          }
+        }
+      },
+      "DependsOn": [
+        "InternetRoute",
+        "SubnetRoutes"
+      ]
+    }
+  },
+  "Outputs": {
+    "RepositoryUri": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Repository",
+          "RepositoryUri"
+        ]
+      }
+    },
+    "TaskRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "TaskRole",
+          "Arn"
+        ]
+      }
+    },
+    "TaskDefinitionArn": {
+      "Value": {
+        "Ref": "Task"
+      }
+    },
+    "Cluster": {
+      "Value": {
+        "Ref": "Cluster"
+      }
+    },
+    "Service": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Service",
+          "Name"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "cluster": "multyr-keeper",
+  "serviceName": "multyr-keeper-simulation",
+  "taskDefinition": "TASK_DEFINITION_ARN_AFTER_REGISTRATION",
+  "desiredCount": 1,
+  "launchType": "FARGATE",
+  "deploymentConfiguration": {
+    "minimumHealthyPercent": 0,
+    "maximumPercent": 100,
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    }
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-011395c910b6d9f65",
+        "subnet-0fa9c2cb2c01c476c",
+        "subnet-0bb294f76731ea133"
+      ],
+      "securityGroups": [
+        "sg-069f3df17e872f256"
+      ],
+      "assignPublicIp": "ENABLED"
+    }
+  }
+}
