@@ -1,3 +1,7 @@
+# Superseded: do not activate the replacement-strategy configuration
+
+The strategy migration described below is on hold while the adapter-only repair is evaluated. Do not switch AWS to `arbitrum-one.next.json`. The adapter-only path retains `arbitrum-one.json` and its existing strategy/upkeep addresses. See [adapter-only-20261019.md](adapter-only-20261019.md).
+
 # Read-only estimator and adapter correction cutover
 
 The pending configuration is `keeper/config/arbitrum-one.next.json`. Activate it only after the Safe migration batch succeeds on Arbitrum One.
