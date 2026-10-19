@@ -17,6 +17,7 @@ import {
 import { arbitrum, base, mainnet } from "viem/chains";
 import type { Config } from "./config.ts";
 import { log } from "./log.ts";
+import { receiptFeeWei } from "./rebalance-gas.ts";
 
 const KNOWN_CHAINS: Record<number, Chain> = { [arbitrum.id]: arbitrum, [mainnet.id]: mainnet, [base.id]: base };
 
@@ -123,6 +124,8 @@ export class ChainClient {
       status: receipt.status,
       block: receipt.blockNumber,
       gasUsed: receipt.gasUsed,
+      effectiveGasPrice: receipt.effectiveGasPrice,
+      actualFeeWei: receiptFeeWei(receipt),
     });
     return receipt.status === "success" ? { status: "mined", receipt } : { status: "reverted", receipt };
   }

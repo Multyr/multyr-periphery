@@ -9,6 +9,7 @@ import {
 } from "../abis.ts";
 import type { UpkeepJobConfig } from "../config.ts";
 import { alert, log } from "../log.ts";
+import { rebalanceGasObservations } from "../rebalance-gas.ts";
 import { sameAddress, type Job, type JobContext, type PreflightCheck, type TickResult } from "./types.ts";
 
 // W1 VaultUpkeep, W2 StrategyUpkeep, W3 ClaimSettlementUpkeep.
@@ -129,6 +130,11 @@ export class UpkeepJob implements Job {
     const logs = parseEventLogs({ abi: this.abi, logs: receipt.logs }).filter((l) =>
       sameAddress(l.address, this.cfg.target),
     );
+    if (this.cfg.flavor === "strategy") {
+      for (const observation of rebalanceGasObservations(receipt)) {
+        log.info("rebalance gas observation", { job: this.id, ...observation });
+      }
+    }
     const tx = receipt.transactionHash;
     let failed = false;
     for (const l of logs as any[]) {

@@ -7,9 +7,9 @@
   "minKeeperBalanceEth": 0.005,
   "addresses": {
     "coreVault": "0x5e0cdb76487BD96Ff069Ef7F78eaDF5b5909C8cb",
-    "strategyVault": "0x7bF0f446BB20b54597E66a602cB94D0F231D24E2",
+    "strategyVault": "0xa9E676D15976A1332905238ca609Dff9A484Efe0",
     "vaultUpkeep": "0xCD31634F472Fcc1D0b64FAE3ed72Bb7C0792B55f",
-    "strategyUpkeep": "0x05202b06647d4597fB851162A1E32AA8437EeFc3",
+    "strategyUpkeep": "0xbcaC314E7237b14E11644FC6Ba73675c8c0612DF",
     "claimSettlementUpkeep": "0x4e845762e66518f34641326C7f77fAf4B81c1260",
     "feeCollector": "0x6917CE91cdC284e637EF51Dc844feFca83789e92",
     "bufferManager": "0x9b3fE5c76e0C10de254Ee2153f71DF6a96020D96",
@@ -29,7 +29,7 @@
       "id": "W2",
       "type": "upkeep",
       "flavor": "strategy",
-      "target": "0x05202b06647d4597fB851162A1E32AA8437EeFc3",
+      "target": "0xbcaC314E7237b14E11644FC6Ba73675c8c0612DF",
       "pollSec": 600,
       "maxActionsPerTick": 10,
       "secondaryGraceSec": 1800
@@ -65,7 +65,7 @@
     {
       "id": "W5",
       "type": "liquidity",
-      "strategyVault": "0x7bF0f446BB20b54597E66a602cB94D0F231D24E2",
+      "strategyVault": "0xa9E676D15976A1332905238ca609Dff9A484Efe0",
       "batchSize": 4,
       "refreshMarginSec": 300,
       "fallbackMaxAgeSec": 3600,
