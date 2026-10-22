@@ -1,0 +1,19 @@
+{
+  "status": "prepared-not-rolled-out",
+  "requires": "Safe migration executed and check-ema-migration.mjs passed",
+  "router": "0x37847D2e12892e3298DEE695e7E971fba0Ca3e24",
+  "previousStrategy": "0xa9E676D15976A1332905238ca609Dff9A484Efe0",
+  "previousUpkeep": "0xbcaC314E7237b14E11644FC6Ba73675c8c0612DF",
+  "strategy": "0x2AD722B6241605481829E4B251AE8A4Ba8Be86cE",
+  "upkeep": "0xAB30b7D1ADe850b6b122bcfF29F389CF1D051D44",
+  "estimator": "0x3d8028cC7052c168cA184Db1B742932ad76e7872",
+  "config": "/app/config/arbitrum-one.ema-first-20261023.json",
+  "awsAccount": "820140266807",
+  "region": "eu-north-1",
+  "cluster": "multyr-keeper",
+  "service": "multyr-keeper-simulation",
+  "deploymentConfiguration": {
+    "minimumHealthyPercent": 0,
+    "maximumPercent": 100
+  }
+}
