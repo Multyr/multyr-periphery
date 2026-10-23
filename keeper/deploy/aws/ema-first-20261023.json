@@ -15,5 +15,6 @@
   "deploymentConfiguration": {
     "minimumHealthyPercent": 0,
     "maximumPercent": 100
-  }
+  },
+  "targetIdleBufferBpsAfterMigration": 0
 }

@@ -13,5 +13,5 @@ if(await read(release.router,'isStrategyEnabled(address) view returns(bool)',[re
 if(await read(release.previousUpkeep,'enabled(address) view returns(bool)',[release.previousStrategy]))throw Error('Old upkeep still enabled');
 if(!await read(config.addresses.strategyUpkeep,'enabled(address) view returns(bool)',[config.addresses.strategyVault]))throw Error('New upkeep disabled');
 if((await read(config.addresses.strategyVault,'rebalanceGasEstimator() view returns(address)')).toLowerCase()!==release.estimator.toLowerCase())throw Error('Estimator mismatch');
-if(Number(await read(config.addresses.strategyVault,'targetIdleBufferBps() view returns(uint16)'))!==1000)throw Error('Reserve mismatch');
+if(Number(await read(config.addresses.strategyVault,'targetIdleBufferBps() view returns(uint16)'))!==0)throw Error('Reserve mismatch');
 console.log(JSON.stringify({status:'migration-complete',blockNumber:String(blockNumber),strategy:config.addresses.strategyVault,upkeep:config.addresses.strategyUpkeep}));
