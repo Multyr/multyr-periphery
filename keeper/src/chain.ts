@@ -51,6 +51,7 @@ export class ChainClient {
   private readonly maxFeePerGas: bigint;
   private readonly receiptTimeoutMs: number;
   private readonly gasLimitMultiplier: number;
+  private confirmedNonceFloor = 0;
 
   constructor(cfg: Config, account: LocalAccount | undefined, opts: { dryRun: boolean; from?: Address }) {
     const chain = KNOWN_CHAINS[cfg.chain.chainId];
@@ -110,14 +111,20 @@ export class ChainClient {
     // only gas actually used is paid.
     const estimate = await this.pub.estimateContractGas(request as any);
     const gas = (estimate * BigInt(Math.round(this.gasLimitMultiplier * 100))) / 100n;
+    // RPC replicas can briefly return a pending nonce older than a receipt we
+    // have already observed. Never reuse a locally confirmed mined nonce.
+    const pendingNonce = await this.pub.getTransactionCount({ address: this.from!, blockTag: "pending" });
+    const nonce = Math.max(pendingNonce, this.confirmedNonceFloor);
     const hash = await this.wallet.writeContract({
       ...(request as any),
       gas,
+      nonce,
       maxFeePerGas: this.maxFeePerGas,
       maxPriorityFeePerGas: fees.maxPriorityFeePerGas ?? 0n,
     });
     log.info("tx sent", { label: req.label, hash, gasEstimate: estimate, gasLimit: gas });
     const receipt = await this.pub.waitForTransactionReceipt({ hash, timeout: this.receiptTimeoutMs });
+    this.confirmedNonceFloor = Math.max(this.confirmedNonceFloor, nonce + 1);
     log.info("tx mined", {
       label: req.label,
       hash,
