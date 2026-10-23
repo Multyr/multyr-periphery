@@ -10,6 +10,8 @@ broadcast/*/
 .env.*
 !.env.example
 !.env.template
+# Keeper deployment envs hold RPC keys / credentials; only the *.env.example files are committed.
+keeper/deploy/*.env
 
 # OS
 .DS_Store
@@ -23,6 +25,9 @@ Thumbs.db
 
 # Node
 node_modules/
+keeper/pdf-cycle-report.json
+keeper/keeper-cycle-report.json
+keeper/keeper-baseline-report.json
 
 # Forge coverage
 lcov.info

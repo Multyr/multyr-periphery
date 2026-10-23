@@ -1,0 +1,80 @@
+{
+  "family": "multyr-keeper-simulation",
+  "cpu": "256",
+  "memory": "512",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "executionRoleArn": "arn:aws:iam::820140266807:role/multyr-keeper-execution-role",
+  "containerDefinitions": [
+    {
+      "name": "keeper",
+      "image": "820140266807.dkr.ecr.eu-north-1.amazonaws.com/multyr-keeper@sha256:d1ce53317b0c9f52b6af8194897635528ad27088359c311e36287e1df6843d5a",
+      "essential": true,
+      "readonlyRootFilesystem": true,
+      "stopTimeout": 120,
+      "environment": [
+        {
+          "name": "KEEPER_INSTANCE",
+          "value": "primary"
+        },
+        {
+          "name": "KEEPER_CONFIG",
+          "value": "config/arbitrum-one.json"
+        },
+        {
+          "name": "AWS_REGION",
+          "value": "eu-north-1"
+        },
+        {
+          "name": "RPC_URLS",
+          "value": "https://arb1.arbitrum.io/rpc"
+        },
+        {
+          "name": "PORT",
+          "value": "8080"
+        },
+        {
+          "name": "LOG_LEVEL",
+          "value": "info"
+        },
+        {
+          "name": "SIGNER",
+          "value": "none"
+        },
+        {
+          "name": "KEEPER_ADDRESS",
+          "value": "0x404da3b474b8b4c87d5e3c39230c71a7237630da"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/multyr-keeper-primary",
+          "awslogs-region": "eu-north-1",
+          "awslogs-stream-prefix": "simulation"
+        }
+      },
+      "healthCheck": {
+        "command": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 120
+      },
+      "command": [
+        "check-loop"
+      ]
+    }
+  ]
+}

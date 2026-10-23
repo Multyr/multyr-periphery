@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multyr Keeper Workers</title>
+<style>
+  :root {
+    --ink: #1b1f24; --muted: #5b6470; --line: #d9dde3; --soft: #f4f6f8;
+    --ok: #1a7f37; --warn: #9a6700; --bad: #cf222e; --accent: #0b5cad;
+  }
+  @page { size: A4; margin: 16mm 14mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: var(--ink);
+    font: 10.5pt/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  main { max-width: 190mm; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20pt; margin: 0 0 2px; }
+  h2 { font-size: 13pt; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--ink); break-after: avoid; }
+  h3 { font-size: 11pt; margin: 14px 0 6px; break-after: avoid; }
+  p { margin: 6px 0; }
+  .sub { color: var(--muted); margin: 0 0 12px; }
+  .banner { border: 1px solid var(--warn); background: #fff8e5; padding: 8px 10px; border-radius: 4px; margin: 10px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 9pt; break-inside: auto; }
+  th, td { text-align: left; vertical-align: top; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  th { background: var(--soft); font-weight: 600; }
+  tr { break-inside: avoid; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  code { font: 8.5pt ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--soft); padding: 0 3px; border-radius: 3px; }
+  .ok { color: var(--ok); font-weight: 600; }
+  .warn { color: var(--warn); font-weight: 600; }
+  .bad { color: var(--bad); font-weight: 600; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+  .kpi { border: 1px solid var(--line); border-radius: 4px; padding: 8px; }
+  .kpi b { display: block; font-size: 15pt; }
+  .kpi span { color: var(--muted); font-size: 8.5pt; }
+  ol, ul { margin: 4px 0 8px; padding-left: 20px; }
+  li { margin: 2px 0; }
+  .page-break { break-before: page; }
+  footer { color: var(--muted); font-size: 8.5pt; margin-top: 20px; border-top: 1px solid var(--line); padding-top: 6px; }
+  @media (max-width: 640px) { .kpis { grid-template-columns: repeat(2, 1fr); } table { font-size: 8pt; } }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Multyr Keeper Workers (W1–W6)</h1>
+<p class="sub">Test report · Arbitrum One deployment of 2026-09-25 · prepared 2026-10-07</p>
+
+<div class="banner"><b>Interim report.</b> All tests were run against local Anvil forks of Arbitrum One. No mainnet transactions were sent. The historical keeper cycle (rows 6–56 of the adapter-cycle PDF driven by keepers) has not finished yet; section 5 lists what is still open.</div>
+
+<div class="kpis">
+  <div class="kpi"><b class="ok">160/160</b><span>Solidity tests (forge)</span></div>
+  <div class="kpi"><b class="ok">22/22</b><span>Keeper unit tests (+1 todo reproducing a bug)</span></div>
+  <div class="kpi"><b>6/6</b><span>Workers exercised with real transactions on a fork</span></div>
+  <div class="kpi"><b class="bad">3</b><span>Issues to fix before go-live</span></div>
+</div>
+
+<h2>1. The workers</h2>
+<p>The keeper makes no allocation decisions. It reads on-chain state, simulates each call from the keeper address, and only sends a transaction when the contract would accept it. All eligibility rules stay on-chain.</p>
+<table>
+  <tr><th>ID</th><th>Contract</th><th>Call</th><th>Permission</th><th>Trigger</th></tr>
+  <tr><td>W1</td><td>VaultUpkeep <code>0x0196…2FFE</code></td><td><code>checkUpkeep</code> → <code>performUpkeep</code></td><td>none</td><td>poll 120 s, up to 10 follow-up actions per tick</td></tr>
+  <tr><td>W2</td><td>StrategyUpkeep <code>0xA01A…3ee6</code></td><td><code>checkUpkeep</code> → <code>performUpkeep</code></td><td>none</td><td>poll 300 s; on-chain <code>pokeInterval</code> (86 400 s) and cooldowns</td></tr>
+  <tr><td>W3</td><td>ClaimSettlementUpkeep <code>0xD8CE…a14E</code></td><td><code>checkUpkeep</code> → <code>performUpkeep</code></td><td>none</td><td>poll 120 s, up to 25 batches per tick</td></tr>
+  <tr><td>W4</td><td>FeeCollector <code>0x7976…4B9a</code></td><td><code>harvestQueued(token)</code>, <code>distribute(token)</code></td><td>none</td><td>harvest when claims are pending; distribute Mon 10:00–16:00 UTC</td></tr>
+  <tr><td>W5</td><td>Strategy vault <code>0xCC4A…AEf1</code></td><td><code>pokeLiquidityBatch(start,end)</code></td><td><b>KEEPER_ROLE</b> per keeper address</td><td>batches whose liquidity cache is within 300 s of expiry</td></tr>
+  <tr><td>W6</td><td>BufferManager <code>0xeC5a…57e1</code></td><td><code>refreshWarmNav()</code></td><td>none</td><td>cache within 120 s of <code>navRefreshInterval</code> (600 s), or invalid</td></tr>
+</table>
+<p><b>Primary / secondary.</b> Both bots run the same image with different keys and RPC providers. The primary acts as soon as a condition is due; the secondary acts only after the condition has stayed due for that worker's grace window.</p>
+
+<h2>2. What was tested</h2>
+<table>
+  <tr><th>Test</th><th>Where</th><th>Result</th></tr>
+  <tr><td>Keeper unit tests: helpers, gate, KMS signing, and every worker's <code>tick()</code> against a scripted chain</td><td>local</td><td class="ok">22 pass, 0 fail, 1 todo</td></tr>
+  <tr><td>Typecheck</td><td>local</td><td class="ok">clean</td></tr>
+  <tr><td>Solidity suite (8 suites)</td><td>local</td><td class="ok">160 / 160</td></tr>
+  <tr><td>Preflight: chain ID, code at all 8 addresses, wiring, roles, config</td><td>live state, block 512 386 690</td><td class="ok">wiring correct</td></tr>
+  <tr><td>Dry run of every worker</td><td>live state</td><td class="ok">W1, W2, W6 due; W5 needs role</td></tr>
+  <tr><td>Real transactions, time warps, primary/secondary failover</td><td>fork at latest block</td><td>see section 3</td></tr>
+  <tr><td>Queue scenario: fees, epoch close/fund, claim payout, fee harvest</td><td>fork at block 509 739 747</td><td>see section 4</td></tr>
+</table>
+
+<h2>3. Results by worker (fork at latest block)</h2>
+<table>
+  <tr><th>Worker</th><th>Result</th><th>Evidence</th></tr>
+  <tr><td>W1</td><td class="bad">Fails with bot gas</td><td>CRYSTALLIZE inner call ran out of gas three times in one tick, which put VaultUpkeep into its 30-minute backoff. With enough gas, CRYSTALLIZE and REBALANCE both succeed.</td></tr>
+  <tr><td>W2</td><td class="warn">Partial with bot gas</td><td>POKE_APY mined but emitted <code>ExternalTVLPokeFailed</code>. With enough gas: POKE_APY then HARVEST, no failure events.</td></tr>
+  <tr><td>W3</td><td class="ok">Pass (section 4)</td><td>Nothing due at the latest block; claim payout verified on the historical fork.</td></tr>
+  <tr><td>W4</td><td class="ok">Pass</td><td>Distributed 59 816 core shares 70 / 29 / 1. With 1 000 USDC funded: nothing outside the window; 700 / 290 / 10 USDC inside it; nothing on re-run.</td></tr>
+  <tr><td>W5</td><td class="ok">Pass</td><td>Refreshed all 7 adapter caches in two batches. Missing KEEPER_ROLE raises an alert and stops.</td></tr>
+  <tr><td>W6</td><td class="ok">Pass</td><td>Refreshes when due; idempotent on re-run.</td></tr>
+  <tr><td>Failover</td><td class="ok">Pass</td><td>Secondary deferred with 156 s and 76 s of grace left while the primary acted; with the primary absent it took over after the grace window. No duplicate transactions.</td></tr>
+</table>
+
+<h3>Gas needed versus the bot's estimate</h3>
+<table>
+  <tr><th>Operation</th><th class="num">Bot estimate</th><th class="num">Actually needed</th><th class="num">Shortfall</th></tr>
+  <tr><td>W1 CRYSTALLIZE</td><td class="num">975 649</td><td class="num">1 104 746</td><td class="num">13 %</td></tr>
+  <tr><td>W2 POKE_APY</td><td class="num">1 577 639</td><td class="num">2 072 735</td><td class="num">31 %</td></tr>
+</table>
+
+<h2 class="page-break">4. Queue scenario (historical fork, block 509 739 747)</h2>
+<p>This scenario starts from the state just before the adapter-cycle PDF, replays its first five transactions, then drives a full deposit → fee → withdrawal → payout cycle with the production worker classes. Fork-only setup: AUTO_HARVEST enabled on the FeeCollector, 1 bps instant-withdrawal cap, zero deposit lock, a fresh keeper wallet with KEEPER_ROLE, a 10 gwei local fee cap, and the USDC price feed's timestamp advanced for the 7-day jump (price, decimals and round IDs preserved). Calls in this pass used a fixed 6 000 000 gas budget, to separate the gas-estimate bug from contract behaviour.</p>
+<table>
+  <tr><th>#</th><th>Worker</th><th>Action</th><th class="num">Gas used</th><th>Outcome</th></tr>
+  <tr><td>1</td><td>W6</td><td><code>refreshWarmNav</code></td><td class="num">99 540</td><td class="ok">valid</td></tr>
+  <tr><td>2</td><td>W5</td><td><code>pokeLiquidityBatch(0,4)</code></td><td class="num">332 950</td><td class="ok">no adapter failures</td></tr>
+  <tr><td>3</td><td>W5</td><td><code>pokeLiquidityBatch(4,7)</code></td><td class="num">236 574</td><td class="ok">no adapter failures</td></tr>
+  <tr><td>4</td><td>W4</td><td><code>distribute(coreShares)</code></td><td class="num">1 148 117</td><td class="ok">queued 9 990 fee shares for harvest</td></tr>
+  <tr><td>–</td><td>user</td><td><code>requestEpochWithdrawal</code></td><td class="num">736 097</td><td>queued withdrawal</td></tr>
+  <tr><td colspan="5"><i>Time advanced one epoch (7 days)</i></td></tr>
+  <tr><td>5</td><td>W6</td><td><code>refreshWarmNav</code></td><td class="num">99 540</td><td class="ok">valid</td></tr>
+  <tr><td>6</td><td>W1</td><td>EPOCH_CLOSE</td><td class="num">541 612</td><td class="ok">success</td></tr>
+  <tr><td>7</td><td>W1</td><td>EPOCH_FUND</td><td class="num">705 044</td><td class="ok">success</td></tr>
+  <tr><td>8</td><td>W1</td><td>CRYSTALLIZE</td><td class="num">837 726</td><td class="ok">success; 59 fee shares minted</td></tr>
+  <tr><td>9</td><td>W3</td><td>SETTLE_CLAIMS</td><td class="num">645 443</td><td class="ok">2 claims paid, 3.989998 USDC (user 3.980024, FeeCollector 0.009974)</td></tr>
+  <tr><td>10</td><td>W4</td><td><code>harvestQueued(coreShares)</code></td><td class="num">112 103</td><td class="ok">9 990 shares → 9 974 USDC units, distributed 6 981 / 2 894 / 99</td></tr>
+  <tr><td>11</td><td>W4</td><td><code>distribute(coreShares)</code></td><td class="num">≈1.1 M</td><td class="ok">queued a new claim for the freshly minted fee shares</td></tr>
+</table>
+
+<h3>Why the earlier run reported a W4 failure</h3>
+<p>The test asserted that no fee claim was pending after step 10. The 7-day jump landed inside the Monday distribution window, so the same tick also ran step 11: it distributed the fee shares that CRYSTALLIZE had just minted and, under AUTO_HARVEST, queued a new claim for them. That is correct behaviour. The assertion has been changed to check that the original claim was settled in full, the USDC was distributed, nothing was left in the FeeCollector, and any claim still pending was queued in that same tick. <b>W4 itself needed no change.</b></p>
+
+<h2>5. Issues and open items</h2>
+<h3>Fix before go-live</h3>
+<ol>
+  <li><b>Gas estimate too low for try/catch operations (keeper).</b> The estimate stops at the lowest gas where the outer call succeeds, which starves the inner call. W2 is the worse case: a failed POKE_APY still sets <code>lastPokeTs</code>, so it is not retried for 24 h. Fix: add a gas buffer (for example estimate × 1.5) or a per-worker gas limit.</li>
+  <li><b>Follow-up loop re-sends a failed operation (keeper).</b> After <code>UpkeepPerformed(success=false)</code>, <code>checkUpkeep</code> stays true and W1 repeats the same failing op until VaultUpkeep backs off. Fix: stop the loop on an inner failure. A unit test (todo) reproduces this.</li>
+  <li><b>VaultUpkeep griefing (core contract).</b> Any address can send three <code>performUpkeep</code> calls with junk data and freeze VaultUpkeep for 1 800 s, repeatedly. Confirmed on the fork. Fix: re-validate <code>performData</code> against <code>checkUpkeep</code> and do not count mismatches as failures.</li>
+</ol>
+<h3>Review</h3>
+<ul>
+  <li>Fee cap compares the full fee estimate including the priority tip. Arbitrum suggests a zero tip today, but a provider that suggests a non-zero tip would make the bot skip every transaction.</li>
+  <li>AUTO_HARVEST is not configured for the core share token on mainnet, so W4's <code>harvestQueued</code> cannot run until governance sets it.</li>
+  <li><code>liquidityStalenessSeconds</code> is 0 on-chain; W5 falls back to 3 600 s.</li>
+  <li>Warm NAV reports <code>nav = 0</code> with <code>valid = true</code> on mainnet; confirm this is expected.</li>
+  <li>Four of seven adapters are not direct APY poke targets for W2: Aave (covered by the rate push), Comet, Euler and Venus. Confirm the last three compute APY live.</li>
+</ul>
+<h3>Still to run</h3>
+<ul>
+  <li>Re-run the historical keeper cycle with the corrected W4 check, through the PDF adapter cycle (rows 6–56 driven by W1/W2).</li>
+  <li>Re-test W1 and W2 with the bot's own gas estimate after fixes 1 and 2.</li>
+  <li>Second RPC provider for the AWS primary (the QuickNode URL supplied returned 401).</li>
+</ul>
+
+<footer>Local fork tests only. Contract addresses are the Arbitrum One deployment of 2026-09-25. Gas figures are from fork receipts and can differ slightly on mainnet.</footer>
+</main>
+</body>
+</html>
