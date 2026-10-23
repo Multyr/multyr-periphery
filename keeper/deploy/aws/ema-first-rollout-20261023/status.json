@@ -1,0 +1,42 @@
+{
+  "taskDefinition": "arn:aws:ecs:eu-north-1:820140266807:task-definition/multyr-keeper-simulation:6",
+  "desiredCount": 1,
+  "runningCount": 1,
+  "pendingCount": 0,
+  "deployments": [
+    {
+      "status": "PRIMARY",
+      "taskDefinition": "arn:aws:ecs:eu-north-1:820140266807:task-definition/multyr-keeper-simulation:6",
+      "desiredCount": 1,
+      "runningCount": 1,
+      "pendingCount": 0,
+      "rolloutState": "IN_PROGRESS",
+      "rolloutStateReason": "ECS deployment ecs-svc/1557443229798984569 in progress."
+    },
+    {
+      "status": "DRAINING",
+      "taskDefinition": "arn:aws:ecs:eu-north-1:820140266807:task-definition/multyr-keeper-simulation:5",
+      "desiredCount": 0,
+      "runningCount": 0,
+      "pendingCount": 0,
+      "rolloutState": "COMPLETED",
+      "rolloutStateReason": "ECS deployment ecs-svc/1419862617755329024 completed."
+    }
+  ],
+  "tasks": [
+    {
+      "taskArn": "arn:aws:ecs:eu-north-1:820140266807:task/multyr-keeper/9fbda37f58a24951862f0d048028b48a",
+      "taskDefinitionArn": "arn:aws:ecs:eu-north-1:820140266807:task-definition/multyr-keeper-simulation:6",
+      "lastStatus": "RUNNING",
+      "healthStatus": "HEALTHY",
+      "stoppedReason": null
+    }
+  ],
+  "events": [
+    "(service multyr-keeper-simulation) has started 1 tasks: (task 9fbda37f58a24951862f0d048028b48a).",
+    "(service multyr-keeper-simulation) has stopped 1 running tasks: (task 2587e46bdf1c454eafcedb6208696bec).",
+    "(service multyr-keeper-simulation) has reached a steady state.",
+    "(service multyr-keeper-simulation) (deployment ecs-svc/1419862617755329024) deployment completed.",
+    "(service multyr-keeper-simulation) has started 1 tasks: (task 2587e46bdf1c454eafcedb6208696bec)."
+  ]
+}
