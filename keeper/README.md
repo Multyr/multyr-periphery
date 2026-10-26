@@ -1,3 +1,18 @@
+## Release candidate: 27 October 2026
+
+The current live service is `multyr-keeper-simulation:6` in `eu-north-1`.
+The name is historical: the worker sends transactions in `run` mode.
+Strategy: `0x2AD722B6241605481829E4B251AE8A4Ba8Be86cE`.
+StrategyUpkeep: `0xAB30b7D1ADe850b6b122bcfF29F389CF1D051D44`.
+Image digest: `sha256:9f4cdae078658c5a42cdf0a9eb49f9ab2242d6e704e9a30c37022d6a3eb8dfb8`.
+Config: `/app/config/arbitrum-one.ema-first-20261023.json`.
+The 26 October read-only service check found running/desired 1/1.
+Earlier revision descriptions below are historical, not rollout instructions.
+`task-definition.json` is a simulation bootstrap template, not the current live
+revision. Do not register it to reproduce the live candidate. Use the versioned
+EMA-first rollout record and preserve runtime RPC/KMS secrets outside Git.
+Code freeze and pre-burn acceptance are separate; acceptance remains incomplete.
+
 # Multyr keeper
 
 A keeper bot for Multyr automation that is not tied to any one provider. It
@@ -94,19 +109,11 @@ See `deploy/*.env.example` for the primary (AWS KMS), secondary (GCP KMS) and sh
 1. **VaultUpkeep is the one target where a duplicate call has a side effect.** Its `performUpkeep` trusts `performData` without re-checking eligibility. An ineligible op fails inside try/catch and increments `consecutiveFailures`; at 3 failures the upkeep backs off for 30 minutes. This holds for *any* caller, so it is a griefing surface under Chainlink or CRE too. The secondary's grace window keeps the two bots from colliding, but the contract-level fix is to re-validate in `performUpkeep` (e.g. compare against `checkUpkeep`) and to skip the failure counter on mismatch.
 2. W2 under-reports one thing: `StrategyUpkeep._performPokeAPY` sets `lastPokeTs` even when individual targets fail. The bot raises those failures as alerts from `SnapshotPokeFailed` and `ExternalTVLPokeFailed`.
 
-## Temporary AWS simulation profile (9 October 2026)
+## AWS live keeper (9 October 2026)
 
-The AWS template in `deploy/aws/stack.json` starts `check-loop`, which runs the
-normal scheduler with simulation-only writes and never loads a signer. Set
-`SIGNER=none` and `KEEPER_ADDRESS=0x404da3b474b8b4c87d5e3c39230c71a7237630da`.
-The prepared task role has no KMS permissions; keeper funding is not needed.
-Polling is W1/W3/W5 every 240 seconds, W2 every 600 seconds, W4 every 1800
-seconds and W6 every 120 seconds. Simulations do not persist state, so due work
-can appear repeatedly until somebody executes it on-chain. A successful outer
-eth_call does not prove every internally caught operation succeeded.
-
-AWS authentication now works, and the simulation image is published in the
-private ECR repository. Provisioning is blocked on an administrator creating the
-ECS execution role and granting scoped PassRole permission; see
-[deployment instructions](deploy/aws/README.md). No service is running yet. The
-3-USDC deposit remains pending while the task is restricted to simulations.
+The user authorized live sending. Service `multyr-keeper-simulation` in eu-north-1
+now runs revision `multyr-keeper-simulation:2` with `run` and `SIGNER=aws-kms`.
+The first five transactions succeeded. W1/W3/W5 poll every 240 seconds, W2 every
+600 seconds, W4 every 1800 seconds, and W6 every 120 seconds. Historical
+simulation results remain in the deployment evidence directory. See
+[deployment details, results, and stop commands](deploy/aws/README.md).

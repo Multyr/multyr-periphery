@@ -1,7 +1,7 @@
 {
   "cluster": "multyr-keeper",
   "serviceName": "multyr-keeper-simulation",
-  "taskDefinition": "TASK_DEFINITION_ARN_AFTER_REGISTRATION",
+  "taskDefinition": "arn:aws:ecs:eu-north-1:820140266807:task-definition/multyr-keeper-simulation:6",
   "desiredCount": 1,
   "launchType": "FARGATE",
   "deploymentConfiguration": {
