@@ -1,0 +1,31 @@
+{
+  "name": "@multyr/keeper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Provider-neutral keeper for Multyr automation (W1-W6). Reads on-chain state and triggers existing keeper entrypoints; makes no allocation decisions.",
+  "license": "BUSL-1.1",
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "cycle:plan": "node scripts/pdf-cycle.ts plan",
+    "cycle:replay": "node scripts/pdf-cycle.ts replay",
+    "cycle:keepers": "node scripts/keeper-cycle.ts",
+    "start": "node src/index.ts run",
+    "once": "node src/index.ts once",
+    "check": "node src/index.ts check",
+    "preflight": "node src/index.ts preflight",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "viem": "^2.21.0"
+  },
+  "optionalDependencies": {
+    "@aws-sdk/client-kms": "^3.600.0",
+    "@google-cloud/kms": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

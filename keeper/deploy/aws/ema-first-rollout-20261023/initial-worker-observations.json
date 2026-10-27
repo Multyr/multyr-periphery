@@ -1,0 +1,87 @@
+[
+  {
+    "stream": "live/keeper/2587e46bdf1c454eafcedb6208696bec",
+    "events": [
+      {
+        "timestamp": 1792751260991,
+        "message": "{\"ts\":\"2026-10-23T10:27:40.991Z\",\"level\":\"info\",\"msg\":\"keeper starting\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"keeper\":\"0x404da3B474b8b4C87d5e3c39230c71A7237630da\",\"jobs\":[\"W1\",\"W2\",\"W3\",\"W4\",\"W5\",\"W6\"]}"
+      },
+      {
+        "timestamp": 1792751261253,
+        "message": "{\"ts\":\"2026-10-23T10:27:41.253Z\",\"level\":\"debug\",\"msg\":\"job tick\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W1\",\"due\":false,\"actions\":0,\"ms\":83}"
+      },
+      {
+        "timestamp": 1792751262195,
+        "message": "{\"ts\":\"2026-10-23T10:27:42.194Z\",\"level\":\"info\",\"msg\":\"tx sent\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"label\":\"W2:DEPLOY_IDLE\",\"hash\":\"0xf7821a51a73c3902b95d0849af62f68dcdea8990184bc003314c29fc24a650c7\",\"gasEstimate\":\"1993830\",\"gasLimit\":\"2990745\"}"
+      },
+      {
+        "timestamp": 1792751262796,
+        "message": "{\"ts\":\"2026-10-23T10:27:42.796Z\",\"level\":\"info\",\"msg\":\"tx mined\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"label\":\"W2:DEPLOY_IDLE\",\"hash\":\"0xf7821a51a73c3902b95d0849af62f68dcdea8990184bc003314c29fc24a650c7\",\"status\":\"success\",\"block\":\"517507346\",\"gasUsed\":\"1965831\",\"effectiveGasPrice\":\"20000000\",\"actualFeeWei\":\"39316620000000\"}"
+      },
+      {
+        "timestamp": 1792751262807,
+        "message": "{\"ts\":\"2026-10-23T10:27:42.806Z\",\"level\":\"info\",\"msg\":\"rebalance gas observation\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W2\",\"strategy\":\"0x2ad722b6241605481829e4b251ae8a4ba8be86ce\",\"event\":\"GasEmaUpdated\",\"adapter\":\"0xE2247C76f1A6f40967f70F114ABa44c8BA0E0F66\",\"emaGas\":\"449162\",\"isDeposit\":true,\"tx\":\"0xf7821a51a73c3902b95d0849af62f68dcdea8990184bc003314c29fc24a650c7\",\"block\":\"517507346\",\"transactionGasUsed\":\"1965831\",\"transactionFeeWei\":\"39316620000000\",\"comparisonScope\":\"remaining-plan-quote-versus-single-transaction\"}"
+      },
+      {
+        "timestamp": 1792751262807,
+        "message": "{\"ts\":\"2026-10-23T10:27:42.807Z\",\"level\":\"info\",\"msg\":\"rebalance gas observation\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W2\",\"strategy\":\"0x2ad722b6241605481829e4b251ae8a4ba8be86ce\",\"event\":\"ExecutionGasObserved\",\"adapter\":\"0xE2247C76f1A6f40967f70F114ABa44c8BA0E0F66\",\"gasUsed\":\"449162\",\"deposit\":true,\"tx\":\"0xf7821a51a73c3902b95d0849af62f68dcdea8990184bc003314c29fc24a650c7\",\"block\":\"517507346\",\"transactionGasUsed\":\"1965831\",\"transactionFeeWei\":\"39316620000000\",\"comparisonScope\":\"remaining-plan-quote-versus-single-transaction\"}"
+      },
+      {
+        "timestamp": 1792751262807,
+        "message": "{\"ts\":\"2026-10-23T10:27:42.807Z\",\"level\":\"debug\",\"msg\":\"upkeep receipt inspected\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W2\",\"op\":\"DEPLOY_IDLE\",\"strategyIndex\":\"0\",\"events\":1}"
+      },
+      {
+        "timestamp": 1792751263222,
+        "message": "{\"ts\":\"2026-10-23T10:27:43.222Z\",\"level\":\"error\",\"msg\":\"W2 tick threw\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"alert\":\"W2:exception\",\"error\":\"Nonce provided for the transaction is lower than the current nonce of the account.\\nTry increasing the nonce or find the latest nonce with `getTransactionCount`.\\n\\nRequest Arguments:\\n  from:                  0x404da3B474b8b4C87d5e3c39230c71A7237630da\\n  to:                    0xAB30b7D1ADe850b6b122bcfF29F389CF1D051D44\\n  data:                  0x4585e33b0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000\\n  gas:                   901797\\n  maxFeePerGas:          1 gwei\\n  maxPriorityFeePerGas:  0 gwei\\n \\nContract Call:\\n  address:   0xAB30b7D1ADe850b6b122bcfF29F389CF1D051D44\\n  function:  performUpkeep(bytes performData)\\n  args:                   (0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000)\\n  sender:    0x404da3B474b8b4C87d5e3c39230c71A7237630da\\n\\nDocs: <url> nonce=3296 minNonce=3297 txHash=0xbc75db762861b3e4053167c4a039d5dae8362aad1a04a94bf1341055ef034beb: nonce too low\\nVersion: viem@2.57.2\"}"
+      },
+      {
+        "timestamp": 1792751263248,
+        "message": "{\"ts\":\"2026-10-23T10:27:43.248Z\",\"level\":\"debug\",\"msg\":\"job tick\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W3\",\"due\":false,\"actions\":0,\"ms\":25}"
+      },
+      {
+        "timestamp": 1792751263322,
+        "message": "{\"ts\":\"2026-10-23T10:27:43.322Z\",\"level\":\"debug\",\"msg\":\"job tick\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W4\",\"due\":false,\"actions\":0,\"deferred\":false,\"ms\":74}"
+      },
+      {
+        "timestamp": 1792751263771,
+        "message": "{\"ts\":\"2026-10-23T10:27:43.771Z\",\"level\":\"info\",\"msg\":\"tx sent\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"label\":\"W5:pokeLiquidityBatch\",\"hash\":\"0x73d49b685520adf4873f5bf14669b2f665f5ee8c4d8f4c17238c5f49d953a490\",\"gasEstimate\":\"681944\",\"gasLimit\":\"1022916\"}"
+      },
+      {
+        "timestamp": 1792751264373,
+        "message": "{\"ts\":\"2026-10-23T10:27:44.373Z\",\"level\":\"info\",\"msg\":\"tx mined\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"label\":\"W5:pokeLiquidityBatch\",\"hash\":\"0x73d49b685520adf4873f5bf14669b2f665f5ee8c4d8f4c17238c5f49d953a490\",\"status\":\"success\",\"block\":\"517507352\",\"gasUsed\":\"690954\",\"effectiveGasPrice\":\"20002000\",\"actualFeeWei\":\"13820461908000\"}"
+      },
+      {
+        "timestamp": 1792751264678,
+        "message": "{\"ts\":\"2026-10-23T10:27:44.678Z\",\"level\":\"info\",\"msg\":\"tx sent\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"label\":\"W5:pokeLiquidityBatch\",\"hash\":\"0xfb38051dbfc006da027f89700e8a8ef7c0d5ecbfc5d4ab5a5c483e669c145a01\",\"gasEstimate\":\"241049\",\"gasLimit\":\"361573\"}"
+      },
+      {
+        "timestamp": 1792751265282,
+        "message": "{\"ts\":\"2026-10-23T10:27:45.282Z\",\"level\":\"info\",\"msg\":\"tx mined\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"label\":\"W5:pokeLiquidityBatch\",\"hash\":\"0xfb38051dbfc006da027f89700e8a8ef7c0d5ecbfc5d4ab5a5c483e669c145a01\",\"status\":\"success\",\"block\":\"517507355\",\"gasUsed\":\"237818\",\"effectiveGasPrice\":\"20040000\",\"actualFeeWei\":\"4765872720000\"}"
+      },
+      {
+        "timestamp": 1792751265283,
+        "message": "{\"ts\":\"2026-10-23T10:27:45.283Z\",\"level\":\"info\",\"msg\":\"job tick\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W5\",\"due\":true,\"actions\":2,\"ms\":1960}"
+      },
+      {
+        "timestamp": 1792751265309,
+        "message": "{\"ts\":\"2026-10-23T10:27:45.309Z\",\"level\":\"debug\",\"msg\":\"job tick\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W6\",\"due\":false,\"actions\":0,\"ms\":26}"
+      },
+      {
+        "timestamp": 1792751385919,
+        "message": "{\"ts\":\"2026-10-23T10:29:45.919Z\",\"level\":\"info\",\"msg\":\"tx sent\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"label\":\"W6:refreshWarmNav\",\"hash\":\"0x5e49d57dca86942d1a1e9fe00f669575b93062ab25f517e0e0845f8ed0365d02\",\"gasEstimate\":\"105163\",\"gasLimit\":\"157744\"}"
+      },
+      {
+        "timestamp": 1792751386534,
+        "message": "{\"ts\":\"2026-10-23T10:29:46.534Z\",\"level\":\"info\",\"msg\":\"tx mined\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"label\":\"W6:refreshWarmNav\",\"hash\":\"0x5e49d57dca86942d1a1e9fe00f669575b93062ab25f517e0e0845f8ed0365d02\",\"status\":\"success\",\"block\":\"517507756\",\"gasUsed\":\"99938\",\"effectiveGasPrice\":\"20010000\",\"actualFeeWei\":\"1999759380000\"}"
+      },
+      {
+        "timestamp": 1792751386535,
+        "message": "{\"ts\":\"2026-10-23T10:29:46.535Z\",\"level\":\"info\",\"msg\":\"warm NAV refreshed\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W6\",\"nav\":\"1284585\",\"tx\":\"0x5e49d57dca86942d1a1e9fe00f669575b93062ab25f517e0e0845f8ed0365d02\"}"
+      },
+      {
+        "timestamp": 1792751386535,
+        "message": "{\"ts\":\"2026-10-23T10:29:46.535Z\",\"level\":\"info\",\"msg\":\"job tick\",\"instance\":\"primary\",\"network\":\"arbitrum-one\",\"mode\":\"run\",\"job\":\"W6\",\"due\":true,\"actions\":1,\"ms\":1225}"
+      }
+    ]
+  }
+]

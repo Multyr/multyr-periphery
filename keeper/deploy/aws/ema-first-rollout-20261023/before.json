@@ -1,0 +1,28 @@
+{
+  "account": "820140266807",
+  "taskDefinition": "arn:aws:ecs:eu-north-1:820140266807:task-definition/multyr-keeper-simulation:4",
+  "desiredCount": 1,
+  "runningCount": 1,
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "image": "820140266807.dkr.ecr.eu-north-1.amazonaws.com/multyr-keeper@sha256:99aae44ad8e78180a8723a9e9d561b16be034d63f2853407d1c48bffc86ca40e",
+  "command": [
+    "run"
+  ],
+  "environmentNames": [
+    "AWS_KMS_KEY_ID",
+    "KEEPER_INSTANCE",
+    "AWS_REGION",
+    "SIGNER",
+    "PORT",
+    "RPC_URLS",
+    "KEEPER_ADDRESS",
+    "LOG_LEVEL",
+    "KEEPER_CONFIG"
+  ],
+  "config": [
+    "config/arbitrum-one.json"
+  ]
+}

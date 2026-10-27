@@ -1,0 +1,6 @@
+{
+  "imageTag": "820140266807.dkr.ecr.eu-north-1.amazonaws.com/multyr-keeper:ema-first-486078a-20261023",
+  "platform": "linux/amd64",
+  "status": "built",
+  "sourceCommit": "486078a"
+}
