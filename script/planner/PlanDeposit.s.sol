@@ -8,11 +8,8 @@ import { IStrategyRouter } from "@multyr-core/interfaces/IStrategyRouter.sol";
 import { IBufferManager } from "@multyr-core/interfaces/IBufferManager.sol";
 
 /// @title PlanDeposit -- off-chain deposit allocation planner (PR-EO keeper integration)
-/// @notice Calculates optimal Allocation[] plan for keeper WITHOUT calling on-chain planDeposit().
-///         The planning logic is replicated here off-chain to reduce on-chain complexity.
-///         Replaces legacy monorepo script/planner/PlanDeposit.s.sol.
-/// @dev View-only script (no broadcast). Output piped to keeper for execute-only pattern.
-///      Does NOT call router.planDeposit() -- all calculation is done off-chain.
+/// @notice Reads the canonical router allocation policy using eth_call.
+/// @dev View-only script (no broadcast). Execution revalidates capacity before transfer.
 /// @custom:chain-id 42161 (Arbitrum One -- enforced at runtime)
 /// @custom:usage forge script multyr-periphery/script/planner/PlanDeposit.s.sol:PlanDeposit \
 ///               --rpc-url $RPC_URL --sig "run(address)" $VAULT_ADDRESS
@@ -100,34 +97,19 @@ contract PlanDeposit is Script {
             return output;
         }
 
-        // Count enabled strategies
-        uint256 enabledCount = 0;
-        for (uint256 i = 0; i < strategies.length; i++) {
-            if (strategies[i].enabled) enabledCount++;
-        }
-
-        if (enabledCount == 0) {
+        // Read the canonical router policy at the planning block. Execution still
+        // revalidates headroom and eligibility before transferring any funds.
+        IStrategyRouter.Allocation[] memory plan = router.planDeposit(available);
+        if (plan.length == 0 || plan.length > MAX_LEGS) {
             output.valid = false;
-            output.reason = "No enabled strategies";
+            output.reason = "No eligible capacity or too many legs";
             return output;
         }
-
-        if (enabledCount > MAX_LEGS) {
-            output.valid = false;
-            output.reason = "Too many enabled strategies (> MAX_LEGS)";
-            return output;
-        }
-
-        // Allocate output arrays
-        output.strategies = new address[](enabledCount);
-        output.amounts = new uint256[](enabledCount);
-
-        if (mode == IStrategyRouter.IntakeMode.PRIORITY) {
-            // Priority mode: allocate to highest priority (lowest number) first
-            _allocatePriority(strategies, available, output);
-        } else if (mode == IStrategyRouter.IntakeMode.WEIGHTED) {
-            // Weighted mode: allocate proportionally by weightBps
-            _allocateWeighted(strategies, available, output);
+        output.strategies = new address[](plan.length);
+        output.amounts = new uint256[](plan.length);
+        for (uint256 i; i < plan.length; ++i) {
+            output.strategies[i] = plan[i].strat;
+            output.amounts[i] = plan[i].amount;
         }
 
         // Validate total
@@ -185,90 +167,6 @@ contract PlanDeposit is Script {
         } catch { }
 
         return hot; // Fallback to full hot
-    }
-
-    function _allocatePriority(
-        IStrategyRouter.StrategyInfo[] memory strategies,
-        uint256 available,
-        PlanOutput memory output
-    ) internal pure {
-        // Find max priority value for iteration bound
-        uint16 maxPriority = 0;
-        for (uint256 i = 0; i < strategies.length; i++) {
-            if (strategies[i].enabled && strategies[i].priority > maxPriority) {
-                maxPriority = strategies[i].priority;
-            }
-        }
-
-        uint256 remaining = available;
-        uint256 k = 0;
-
-        // Iterate by priority level (0 = highest priority)
-        for (uint16 p = 0; remaining > 0 && p <= maxPriority; p++) {
-            for (uint256 i = 0; i < strategies.length && remaining > 0; i++) {
-                if (!strategies[i].enabled || strategies[i].priority != p) continue;
-
-                // Allocate all remaining to this strategy
-                output.strategies[k] = strategies[i].strat;
-                output.amounts[k] = remaining;
-                remaining = 0;
-                k++;
-            }
-        }
-    }
-
-    function _allocateWeighted(
-        IStrategyRouter.StrategyInfo[] memory strategies,
-        uint256 available,
-        PlanOutput memory output
-    ) internal pure {
-        // Calculate total weight
-        uint256 totalWeight = 0;
-        for (uint256 i = 0; i < strategies.length; i++) {
-            if (strategies[i].enabled) {
-                totalWeight += strategies[i].weightBps;
-            }
-        }
-
-        uint256 k = 0;
-
-        if (totalWeight == 0) {
-            // No weights set - distribute equally
-            uint256 enabledCount = 0;
-            for (uint256 i = 0; i < strategies.length; i++) {
-                if (strategies[i].enabled) enabledCount++;
-            }
-            uint256 perStrategy = available / enabledCount;
-
-            for (uint256 i = 0; i < strategies.length; i++) {
-                if (strategies[i].enabled) {
-                    output.strategies[k] = strategies[i].strat;
-                    output.amounts[k] = perStrategy;
-                    k++;
-                }
-            }
-            return;
-        }
-
-        // Allocate proportionally
-        uint256 allocated = 0;
-        for (uint256 i = 0; i < strategies.length; i++) {
-            if (!strategies[i].enabled) continue;
-
-            output.strategies[k] = strategies[i].strat;
-
-            // Calculate proportional amount
-            uint256 amount = (available * strategies[i].weightBps) / totalWeight;
-
-            // For last strategy, give remainder to avoid dust
-            if (k == output.strategies.length - 1) {
-                amount = available - allocated;
-            }
-
-            output.amounts[k] = amount;
-            allocated += amount;
-            k++;
-        }
     }
 
     /// @notice Encode plan as JSON-compatible string for keeper integration
