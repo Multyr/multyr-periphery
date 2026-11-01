@@ -1,0 +1,48 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 552B done
+#1 DONE 0.0s
+
+#2 [auth] library/node:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/node:24-alpine
+#3 DONE 1.4s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 77B done
+#4 DONE 0.0s
+
+#5 [1/6] FROM docker.io/library/node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53
+#5 resolve docker.io/library/node:24-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 9.27kB done
+#6 DONE 0.0s
+
+#7 [3/6] COPY package.json package-lock.json* ./
+#7 CACHED
+
+#8 [2/6] WORKDIR /app
+#8 CACHED
+
+#9 [4/6] RUN npm ci --omit=dev --include=optional || npm install --omit=dev --include=optional
+#9 CACHED
+
+#10 [5/6] COPY src ./src
+#10 DONE 0.0s
+
+#11 [6/6] COPY config ./config
+#11 DONE 0.0s
+
+#12 exporting to image
+#12 exporting layers 0.0s done
+#12 exporting manifest sha256:231bc850557a2d5d08488454cb1908051d029b2c2d0a08e23c70ef9d12effdaf done
+#12 exporting config sha256:ff9c9a9f127e5177e0b42fe3f569aa512ce31692eef7b534009033f0c4c4e943 done
+#12 exporting attestation manifest sha256:7841e625c6745dc598e11d307331f7354ef2cf0056fe3ae51fc9d3a9c9ffc4e6 done
+#12 exporting manifest list sha256:9f4cdae078658c5a42cdf0a9eb49f9ab2242d6e704e9a30c37022d6a3eb8dfb8
+#12 exporting manifest list sha256:9f4cdae078658c5a42cdf0a9eb49f9ab2242d6e704e9a30c37022d6a3eb8dfb8 done
+#12 naming to 820140266807.dkr.ecr.eu-north-1.amazonaws.com/multyr-keeper:ema-first-e76c59f-20261023 done
+#12 DONE 0.1s

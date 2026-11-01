@@ -1,0 +1,3 @@
+{"status":"migration-complete","blockNumber":"517510894","strategy":"0x2AD722B6241605481829E4B251AE8A4Ba8Be86cE","upkeep":"0xAB30b7D1ADe850b6b122bcfF29F389CF1D051D44"}
+{"status": "rollout-requested", "previousTaskDefinition": "arn:aws:ecs:eu-north-1:820140266807:task-definition/multyr-keeper-simulation:5", "newTaskDefinition": "arn:aws:ecs:eu-north-1:820140266807:task-definition/multyr-keeper-simulation:6", "image": "820140266807.dkr.ecr.eu-north-1.amazonaws.com/multyr-keeper@sha256:9f4cdae078658c5a42cdf0a9eb49f9ab2242d6e704e9a30c37022d6a3eb8dfb8"}
+Confirm ECS stabilization and first W2/W5 receipts before marking rollout complete.

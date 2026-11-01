@@ -1,0 +1,66 @@
+The push refers to repository [820140266807.dkr.ecr.eu-north-1.amazonaws.com/multyr-keeper]
+44136fa355b3: Waiting
+15577f11e05a: Waiting
+bc5695f51881: Waiting
+7b229517ed22: Waiting
+bc5695f51881: Waiting
+7b229517ed22: Waiting
+44136fa355b3: Waiting
+15577f11e05a: Waiting
+15577f11e05a: Waiting
+bc5695f51881: Waiting
+7b229517ed22: Waiting
+44136fa355b3: Waiting
+15577f11e05a: Waiting
+bc5695f51881: Waiting
+7b229517ed22: Waiting
+44136fa355b3: Waiting
+7b229517ed22: Waiting
+44136fa355b3: Waiting
+15577f11e05a: Waiting
+bc5695f51881: Waiting
+15577f11e05a: Waiting
+bc5695f51881: Waiting
+7b229517ed22: Waiting
+44136fa355b3: Waiting
+7b229517ed22: Waiting
+44136fa355b3: Waiting
+15577f11e05a: Waiting
+bc5695f51881: Waiting
+15577f11e05a: Waiting
+bc5695f51881: Waiting
+7b229517ed22: Waiting
+44136fa355b3: Waiting
+00458df44a6f: Waiting
+15577f11e05a: Layer already exists
+bc5695f51881: Waiting
+7b229517ed22: Layer already exists
+44136fa355b3: Already exists
+f0a5c9e3ce7d: Waiting
+109c2f814f46: Waiting
+f0a5c9e3ce7d: Waiting
+109c2f814f46: Waiting
+00458df44a6f: Waiting
+bc5695f51881: Waiting
+7e75a1168867: Waiting
+32c88d094d06: Waiting
+2c45f3067e4c: Waiting
+f0a5c9e3ce7d: Layer already exists
+109c2f814f46: Layer already exists
+00458df44a6f: Layer already exists
+7e75a1168867: Waiting
+32c88d094d06: Waiting
+2c45f3067e4c: Waiting
+32c88d094d06: Layer already exists
+2c45f3067e4c: Waiting
+20f4c97adcb6: Waiting
+7e75a1168867: Layer already exists
+2c45f3067e4c: Waiting
+20f4c97adcb6: Waiting
+2c45f3067e4c: Waiting
+20f4c97adcb6: Waiting
+bc5695f51881: Pushed
+20f4c97adcb6: Waiting
+2c45f3067e4c: Pushed
+20f4c97adcb6: Pushed
+error from registry: The image tag 'ema-first-e76c59f-20261023' already exists in the 'multyr-keeper' repository and cannot be overwritten because the tag is immutable.

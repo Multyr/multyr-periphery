@@ -41,7 +41,7 @@
         },
         {
           "name": "LOG_LEVEL",
-          "value": "info"
+          "value": "debug"
         },
         {
           "name": "SIGNER",
@@ -76,5 +76,6 @@
         "check-loop"
       ]
     }
-  ]
+  ],
+  "taskRoleArn": "arn:aws:iam::820140266807:role/multyr-keeper-task-role"
 }
