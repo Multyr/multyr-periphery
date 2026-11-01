@@ -31,3 +31,4 @@ keeper/keeper-baseline-report.json
 
 # Forge coverage
 lcov.info
+!.env.shadow.example
